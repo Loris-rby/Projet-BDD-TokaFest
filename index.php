@@ -11,7 +11,7 @@
 <body>
     <header>
         <div class="logo">
-            <img src="images/logo.png" alt="Logo TokaFest">
+            <img src="images/logo.jpg" alt="Logo TokaFest">
         </div>
         <nav>
             <ul>        
