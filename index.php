@@ -14,15 +14,15 @@
 <body>
     <header>
         <div class="logo">
-            <img src="images/logo.png" alt="Logo TokaFest">
+            <img src="images/Logo.jpg" alt="Logo TokaFest">
         </div>
         <nav class="navbar navbar-expand-lg bg-transparent">
             <div class="container-fluid">
                 <div class="navbar navbar-expand-xl">
-                    <a class="navbar-brand text-success" href="index.php">TokaFest</a>
+                    <a class="navbar-brand" href="index.php">TokaFest</a>
                 </div>
                 <div class="btn-group dropstart">
-                    <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     <ul class="dropdown-menu">
