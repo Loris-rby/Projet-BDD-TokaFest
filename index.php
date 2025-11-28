@@ -12,14 +12,9 @@
     <title>Projet</title>
 </head>
 <body>
-<header>
-    <video autoplay muted loop>
-        <source src="images/video.mov" type="video/mp4">
-        Votre navigateur ne supporte pas la vidéo HTML5.
-    </video>
-    <div class="container-fluid standard">
-        <div class="row">
-            <div class="col-lg-6 noir"></div>
+    <header>
+        <div class="logo">
+            <img src="images/logo.png" alt="Logo TokaFest">
         </div>
         <nav class="navbar navbar-expand-lg bg-transparent">
             <div class="container-fluid">
