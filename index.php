@@ -1,56 +1,139 @@
 <!DOCTYPE html>
-
 <html lang="fr">
 <head>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0    ">
-    <link rel="stylesheet" href="style.css">
-    <title>TokaFest</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Projet</title>
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <img src="images/logo.png" alt="Logo TokaFest">
+<header>
+    <video autoplay muted loop>
+        <source src="images/video.mov" type="video/mp4">
+        Votre navigateur ne supporte pas la vidéo HTML5.
+    </video>
+    <div class="container-fluid standard">
+        <div class="row">
+            <div class="col-lg-6 noir"></div>
         </div>
-        <nav>
-            <ul>        
-                <li><a href="index.php">Accueil</a></li>
-                <li><a href="evenements.php">Événements</a></li>
-                <li><a href="artistes.php">Artistes</a></li>
-                <li><a href="contact.php">Contact</a></li>
-            </ul>
+        <nav class="navbar navbar-expand-lg bg-transparent">
+            <div class="container-fluid">
+                <div class="navbar navbar-expand-xl">
+                    <a class="navbar-brand text-success" href="index.php">TokaFest</a>
+                </div>
+                <div class="btn-group dropstart">
+                    <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="index.php#histoire">Présentation</a></li>
+                        <li><a class="dropdown-item" href="index.php#themes">Images</a></li>
+                        <!-- <li><a class="dropdown-item" href="Pages/action.php">Actions</a></li>-->
+                        <?php if (isset($_SESSION['user_id'])): ?>
+                            <li><a class="dropdown-item" href="Pages/compte.php">Compte</a></li>
+                        <?php else: ?>
+                            <li><a class="dropdown-item" href="Pages/connect.php">Connexion</a></li>
+                        <?php endif; ?>
+                    </ul>
+                </div>
+            </div>
         </nav>
-    </header>   
-    <main>
-        <section class="hero">
-            <h1>Bienvenue au TokaFest</h1>
-            <p>Le festival incontournable de la culture japonaise et asiatique !</p>
-            <a href="evenements.php" class="btn">Voir les événements</a>
-        </section>
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <p>Venez découvrir le Festival TokaFest en Dordogne !</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
 
-        <section class="about">
-            <h2>À propos du TokaFest</h2>
-            <p>Le TokaFest est un festival annuel qui célèbre la culture japonaise et asiatique à travers des événements, des ateliers, des concerts et bien plus encore. Rejoignez-nous pour une expérience inoubliable !</p>
-        </section>  
-        <section class="events-preview">
-            <h2>Événements à venir</h2>
-            <div class="event-card">
-                <img src="images/event1.jpg" alt="Événement 1">
-                <h3>Concert de J-Pop</h3>
-                <p>Date: 15 Juillet 2024</p>
-                <a href="evenements.php" class="btn">En savoir plus</a>
+<section id="histoire">
+    <br><br><br><h1>Présentation de TokaFest</h1>
+    <div class="container-fluid">
+        <!-- Première rangée : Paragraphe à gauche, Image à droite -->
+        <div class="row">
+            <div class="col-md-6 text-light paragrapheun">
+                <p>
+                    <br><b>✨ TokaFest : Le Spot Électro qui Réveille la Dordogne ! </b><br><br>
+                    Attachez vos ceintures (et surtout vos baskets !) : le TokaFest, c'est bien plus qu'un simple festival,
+                     c'est la pépite électro cachée en plein cœur du Périgord qui est en train de se faire un nom. Oubliez 
+                     les gros mastodontes impersonnels ; ici, on est sur un événement à taille humaine, né de la passion de 
+                     dingues de son qui voulaient faire vibrer la Dordogne autrement.<br>
+                    Imaginez un week-end où le chant des oiseaux laisse place aux beats pulsés de la techno, de la house entraînante 
+                    et de pépites micro-house qui font hocher la tête sans même s'en rendre compte. Le TokaFest, c'est le lieu de rendez-vous 
+                    de ceux qui aiment la musique électronique pointue, celle qui fait voyager les esprits et bouger les corps jusqu'au lever du 
+                    soleil. La programmation est toujours un savant mélange entre des têtes d'affiche que tout le monde veut voir, et des jeunes 
+                    talents qui sont la relève de demain. C'est l'occasion parfaite de dire : "J'y étais avant que ça devienne trop connu !"
+
+                    En gros, si vous cherchez une expérience électro authentique, conviviale et pleine de bonnes vibes, le tout dans un cadre naturel 
+                    magnifique qui sent bon les vacances... le TokaFest est votre nouvelle destination incontournable. Préparez-vous à une immersion totale, 
+                    où la musique, l'art et la fête se rencontrent pour créer des souvenirs inoubliables sous le ciel étoilé de la Dordogne !
+                </p>
             </div>
-            <div class="event-card">
-                <img src="images/event2.jpg" alt="Événement 2">
-                <h3>Atelier de Calligraphie</h3>
-                <p>Date: 20 Juillet 2024</p>
-                <a href="evenements.php" class="btn">En savoir plus</a>
+            <div class="col-md-6 d-flex align-items-center justify-content-center">
+                <img src="images/1.jpeg" alt="img de paysage" class="img-fluid half-width">
             </div>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2024 TokaFest. Tous droits réservés.</p>
-    </footer>
+        </div>
+        <!-- Deuxième rangée : Image à gauche, Paragraphe à droite -->
+        <div class="row">
+            <div class="col-md-6 d-flex align-items-center justify-content-center">
+                <img src="images/5.jpeg" alt="img de paysage" class="img-fluid half-width">
+            </div>
+            <div class="col-md-6 text-light paragraphedeux">
+                <p>
+                    <br><br><br><b>À qui s’adresse Planète Locale ? </b><br><br>
+                    Nous visons tous les acteurs engagés dans la protection de l’environnement, notamment :<br>
+                    <b>Les citoyens engagés :</b> ceux qui souhaitent participer activement à des actions locales et
+                    contribuer à leur communauté.<br>
+                    Les associations environnementales : qui peuvent promouvoir leurs événements et recruter des bénévoles motivés.<br>
+                    Les collectivités locales : qui peuvent coordonner et faire connaître les initiatives de leur territoire.<br><br>
+                    <b>Notre engagement envers l'ODD 13 : Lutte contre le changement climatique</b><br><br>
+                    Planète Locale s’inscrit dans la réalisation de l’Objectif de Développement Durable 13 en favorisant l’engagement
+                    et la mobilisation citoyenne. Plus nous serons nombreux à agir, plus nos actions auront un impact fort et durable.
+                    En rendant les initiatives locales plus visibles, Planète Locale contribue à construire une communauté consciente et
+                    active dans la lutte contre le changement climatique.
+                    Rejoignez-nous sur Planète Locale et devenez acteur du changement !
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="themes">
+    <br><br><br><h2 class="titre-theme">Retours en images</h2>
+    <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner"> <!--on va créer l'intérieur du carousel-->
+            <div class="carousel-item active"> <!--on va mettre l'image et on ajoute "active" pour faire apparaître cette diapo en premier-->
+                <img src="images/16.jpg" class="d-block w-100" alt="image d'une action 1"> <!--d-block = display:block-->
+            </div>
+            <div class="carousel-item">
+                <img src="images/15.jpg" class="d-block w-100" alt="image d'une action 2">
+            </div>
+            <div class="carousel-item">
+                <img src="images/17.jpg" class="d-block w-100" alt="image d'une action 3 ">
+            </div>
+        </div>
+        <!--on va créer dessous les flèches gauche et droite-->
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span> <!--Ajoute un bouton gauche au carousel-->
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+            <br><br><br>
+        </button>
+    </div>
+</section>
+
+<!--Script Bootstrap-->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
 </body>
-</html> 
+</html>
