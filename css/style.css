@@ -1,0 +1,271 @@
+body {
+    background-color: black;
+}
+
+header {
+    height: 600px;
+    width: auto;
+    background-size: cover;
+    background-repeat: no-repeat;
+    box-shadow: 0px 3px 6px rgb(255, 209, 124);
+    position: relative;
+    overflow-x: hidden; /* Assure que le contenu déborde pas */
+}
+
+header video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1; /* Place la vidéo en arrière-plan */
+}
+
+header .container {
+    position: relative;
+    z-index: 1; /* Place le texte au-dessus de la vidéo */
+    color: white;
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    margin-top: 10%;
+}
+
+header .container p {
+    font-size: 50px;
+}
+
+/* Partie dropdown */
+.dropdown-item:hover {
+    background-color: darkorange;
+    color: white;
+}
+
+/* Les titres */
+h1, h2 {
+    margin-top: 20px;
+    margin-left: 20px;
+    color: white;
+}
+
+/* La source du texte, je retire la décoration */
+.source {
+    color: white;
+    text-decoration: none;
+}
+
+.source:hover {
+    color: orange;
+}
+
+/* Image du paysage1 */
+.paysage1 img {
+    width: 150px;
+}
+
+@media (min-width:576px) and (max-width:768px) {
+    .paragrapheun {
+        width: 500px;
+    }
+    .paragraphedeux {
+        width: 600px;
+    }
+}
+
+/* Partie carousel */
+.carousel img {
+    height: 500px;
+    width: 500px;
+    object-fit: contain;
+}
+
+.carousel-item {
+    height: 400px;
+}
+
+/* Partie contact */
+.contact {
+    background-color: grey;
+    padding: 20px;
+}
+
+.contact h2 {
+    margin-left: 0px;
+}
+
+.contact button {
+    padding: 10px;
+    border-radius: 10px;
+    background-color: rgb(249, 190, 81);
+    color: white;
+    border: none;
+}
+
+.contact button:hover {
+    background-color: rgb(250, 221, 166);
+    color: black;
+}
+
+.standard {
+    background: black;
+}
+
+.noir {
+    --bs-bg-opacity: 1;
+    background-color: black;
+}
+
+.container-fluid.standard {
+    max-width: 100%; /* Ajuste selon la largeur désirée */
+    height: 80px; /* Ajuste la hauteur comme nécessaire */
+    margin: 0 auto; /* Centre le bandeau si nécessaire */
+}
+
+.half-width {
+    width: 80%; /* Prend toute la largeur de la colonne */
+    max-width: 100%; /* Empêche le débordement */
+    height: auto; /* Conserve le ratio d'origine de l'image */
+}
+
+#histoire {
+    box-shadow: 0px 3px 6px rgb(255, 209, 124); /* Ombre orange */
+    padding-bottom: 20px; /* Optionnel : pour ajouter un espace entre l'ombre et le contenu */
+}
+
+#histoire {
+    width: 100vw; /* Étend la section histoire à la largeur complète de la fenêtre */
+    padding-bottom: 20px;
+    background-color: black;
+    box-shadow: 0px 3px 6px rgb(255, 209, 124); /* Ombre pour la transition */
+    margin-left: calc((100vw - 100%) / -2); /* Récupère le débordement du container */
+    padding: 20px 0;
+}
+
+#themes {
+    background-color: black;
+    padding-top: 50px; /* Ajoute de l'espace pour la transition */
+    padding-bottom: 50px; /* Pour donner de l'air autour du carrousel */
+}
+
+/* Nouveaux styles pour le menu */
+.navbar {
+    background-color: rgba(0, 0, 0, 0.8); /* Fond semi-transparent */
+    padding: 10px 20px;
+    border-radius: 10px;
+}
+
+.navbar-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: white;
+}
+
+.navbar-brand:hover {
+    color: orange;
+}
+
+.btn-group .btn {
+    background-color: green; /* Fond vert */
+    border: none;
+    border-radius: 10px;
+}
+
+.btn-group .btn:hover {
+    background-color: darkgreen; /* Fond vert foncé au survol */
+    color: white;
+}
+
+.dropdown-menu {
+    background-color: rgba(0, 0, 0, 0.8); /* Fond semi-transparent */
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.dropdown-item {
+    color: white;
+    font-size: 18px;
+    padding: 10px 20px;
+}
+
+.dropdown-item:hover {
+    background-color: darkorange;
+    color: white;
+}
+
+/* --- Styles pour la carte interactive --- */
+.maps-section {
+    background-color: black;
+    padding: 20px 0;
+}
+
+.map {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 20px auto;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    background: black; /* Remplacez le fond blanc par du noir */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.map__image {
+    flex: 2;
+    min-width: 400px;
+    padding: 0; /* Retirez le padding pour éviter la zone blanche */
+    background-image: url('./../images/10.jpeg'); /* Ajoutez cette ligne */
+    background-size: cover; /* Assurez-vous que l'image couvre toute la zone */
+    background-position: center; /* Centre l'image */
+    background-repeat: no-repeat; /* Empêche la répétition de l'image */
+}
+
+.map__image svg {
+    width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.5); 
+}
+
+.map__image path {
+    fill: #ddd;
+    stroke: #333;
+    stroke-width: 1;
+    transition: fill 0.3s, stroke 0.3s;
+}
+
+.map__image path:hover {
+    fill: #549955; 
+    stroke: #549955;
+    cursor: pointer;
+}
+
+.map__list {
+    flex: 1;
+    padding: 20px;
+    background: black;
+}
+
+.map__list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.map__list li {
+    margin-bottom: 10px;
+    color: green;
+}
+
+.map__list a {
+    text-decoration: none;
+    color: #549955;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.map__list a:hover {
+    color: #ddd; 
+    text-decoration: underline;
+}

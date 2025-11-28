@@ -1,0 +1,136 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: black;
+    overflow: hidden; /* Empêche les barres de défilement inutiles */
+}
+
+/* Vidéo en arrière-plan */
+.video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1; /* Place la vidéo derrière tous les autres éléments */
+}
+
+/* Partie header */
+header {
+    height: 300px;
+    width: auto;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+/* Supprimer la barre orange au-dessus du formulaire */
+.standard {
+    box-shadow: none; /* Supprime l'ombre */
+}
+
+/* Nouveaux styles pour le menu (optionnels, si tu veux personnaliser le comportement des boutons) */
+.navbar-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: white;
+}
+
+.btn-group .btn {
+    background-color: green; /* Fond vert */
+    border: none;
+    border-radius: 10px;
+}
+
+.btn-group .btn:hover {
+    background-color: darkgreen; /* Fond vert foncé au survol */
+    color: white;
+}
+
+.dropdown-menu {
+    background-color: rgba(0, 0, 0, 0.8); /* Fond semi-transparent */
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.dropdown-item {
+    color: white;
+    font-size: 18px;
+    padding: 10px 20px;
+}
+
+/* Styles pour la section de connexion */
+.signup-section, .login-section {
+    position: relative; /* Garde les éléments au-dessus de la vidéo */
+    z-index: 1; /* Place le contenu devant la vidéo */
+    padding: 50px 0; /* Ajoute de l'espace autour du formulaire */
+    color: black;
+}
+
+/* Formulaire noir */
+.signup-card, .login-card {
+    background-color: black; /* Fond noir */
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: none; /* Supprime l'ombre */
+}
+
+.signup-card .form-label, .login-card .form-label {
+    color: white; /* Texte blanc pour les labels */
+}
+
+.signup-card .form-control, .login-card .form-control {
+    background-color: rgba(255, 255, 255, 0.1); /* Fond semi-transparent */
+    color: white; /* Texte en blanc */
+    border: 1px solid rgba(255, 255, 255, 0.5); /* Bordure légère */
+}
+
+.signup-card .form-control::placeholder, .login-card .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5); /* Placeholders en blanc transparent */
+}
+
+.signup-card .btn-success, .login-card .btn-success {
+    background-color: green; /* Bouton vert */
+    border: none;
+}
+
+.signup-card .btn-success:hover, .login-card .btn-success:hover {
+    background-color: darkgreen; /* Fond vert foncé au survol */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    header {
+        height: 200px;
+    }
+
+    .signup-card, .login-card {
+        padding: 15px;
+    }
+
+    .btn-group .btn {
+        font-size: 14px;
+    }
+
+    .dropdown-item {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        height: 150px;
+    }
+
+    .signup-card, .login-card {
+        padding: 10px;
+    }
+
+    .btn-group .btn {
+        font-size: 12px;
+    }
+
+    .dropdown-item {
+        font-size: 14px;
+    }
+}
