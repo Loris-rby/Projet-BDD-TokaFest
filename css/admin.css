@@ -1,0 +1,194 @@
+
+body {
+    background-color: black;
+    color: white;
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* --- Typographie --- */
+h1, h2, .brand-title {
+    font-family: 'Playfair Display', serif;
+    color: white;
+}
+
+/* --- Navigation Admin --- */
+.admin-nav {
+    background: rgba(15, 0, 35, 0.95); /* Violet très sombre */
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #333;
+    box-shadow: 0px 3px 15px rgba(123, 97, 255, 0.3); /* Glow violet */
+    margin-bottom: 40px;
+}
+
+.brand-title {
+    font-size: 28px;
+    text-decoration: none;
+}
+
+.brand-subtitle {
+    font-size: 14px; 
+    color: #888; 
+    font-family: sans-serif;
+    margin-left: 10px;
+}
+
+.user-info {
+    color: #ccc;
+    margin-right: 20px;
+    font-family: sans-serif;
+}
+
+/* --- Boutons --- */
+.btn-logout {
+    color: #FF6FA3; /* Rose */
+    text-decoration: none;
+    border: 1px solid #FF6FA3;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: 0.3s;
+    font-family: sans-serif;
+}
+
+.btn-logout:hover {
+    background-color: #FF6FA3;
+    color: white;
+}
+
+.btn-delete {
+    display: inline-block;
+    color: #666;
+    text-decoration: none;
+    border: 1px solid #333;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    font-family: sans-serif;
+}
+
+.btn-delete:hover {
+    border-color: #FF6FA3;
+    color: #FF6FA3;
+    background: rgba(255, 111, 163, 0.1);
+}
+
+/* --- Layout --- */
+.admin-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* --- Cartes (Reprise du style de tes sections) --- */
+.admin-card {
+    background-color: #0a0a0a;
+    border: 1px solid #222;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 40px;
+    /* Ton ombre violette signature */
+    box-shadow: 0px 4px 20px rgba(123, 97, 255, 0.25);
+}
+
+.card-header {
+    border-bottom: 1px solid #333;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+/* --- Tableaux --- */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #ddd;
+}
+
+.admin-table th {
+    text-align: left;
+    padding: 15px;
+    color: #7B61FF; /* Violet */
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    border-bottom: 2px solid #333;
+}
+
+.admin-table td {
+    padding: 15px;
+    border-bottom: 1px solid #1f1f1f;
+    vertical-align: middle;
+}
+
+.admin-table tr:hover {
+    background-color: rgba(123, 97, 255, 0.05);
+}
+
+/* --- Badges --- */
+.badge {
+    background-color: #222;
+    border: 1px solid #444;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    color: #ccc;
+    font-family: sans-serif;
+}
+
+.badge-purple {
+    border-color: #7B61FF;
+    color: #7B61FF;
+}
+
+/* --- Login Spécifique --- */
+.login-wrapper {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-box {
+    width: 100%;
+    max-width: 350px;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    background-color: #1a1a1a;
+    color: white;
+    box-sizing: border-box;
+}
+
+.form-input:focus {
+    border-color: #7B61FF;
+    outline: none;
+}
+
+.btn-login {
+    width: 100%;
+    padding: 12px;
+    background-color: #7B61FF;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.btn-login:hover {
+    background-color: #6E3BFF;
+}

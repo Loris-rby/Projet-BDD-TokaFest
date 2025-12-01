@@ -13,9 +13,10 @@
 </head>
 <body>
     <header>
-        <div class="logo">
-            <img src="images/Logo.jpg" alt="Logo TokaFest">
-        </div>
+        <video autoplay muted loop>
+        <source src="images/video.mp4" type="video/mp4">
+        Votre navigateur ne supporte pas la vidéo HTML5.
+        </video>
         <nav class="navbar navbar-expand-lg bg-transparent">
             <div class="container-fluid">
                 <div class="navbar navbar-expand-xl">
