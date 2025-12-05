@@ -1,3 +1,7 @@
+<?php
+session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -29,11 +33,11 @@
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="index.php#histoire">Présentation</a></li>
                         <li><a class="dropdown-item" href="index.php#themes">Images</a></li>
-                        <!-- <li><a class="dropdown-item" href="Pages/action.php">Actions</a></li>-->
+                        <li><a class="dropdown-item" href="Pages-Benevoles/index.php">Benevoles</a></li>
                         <?php if (isset($_SESSION['user_id'])): ?>
-                            <li><a class="dropdown-item" href="Pages/compte.php">Compte</a></li>
+                            <li><a class="dropdown-item" href="Pages-Admin/dashboard.php">Dashboard</a></li>
                         <?php else: ?>
-                            <li><a class="dropdown-item" href="Pages/connect.php">Connexion</a></li>
+                            <li><a class="dropdown-item" href="Pages-Admin/login.php">Admin</a></li>
                         <?php endif; ?>
                     </ul>
                 </div>
