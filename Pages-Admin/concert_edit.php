@@ -8,32 +8,30 @@ $id = null;
 $artiste_id = ""; $scene_id = ""; $heure_debut = ""; $heure_fin = "";
 $pageTitle = "Programmer un Concert";
 
-// Listes
+// Chargement des listes
 $artistes = $manager->executeQuery('tokafest_db.artistes', new MongoDB\Driver\Query([], ['sort' => ['nom_scene_artiste' => 1]]))->toArray();
 $scenes = $manager->executeQuery('tokafest_db.scenes', new MongoDB\Driver\Query([], ['sort' => ['nom_scene' => 1]]))->toArray();
 
-// Mode MODIFICATION
 if (isset($_GET['id'])) {
     try {
         $id = new MongoDB\BSON\ObjectId($_GET['id']);
         $cursor = $manager->executeQuery('tokafest_db.concerts', new MongoDB\Driver\Query(['_id' => $id]));
-        $concert = current($cursor->toArray());
-        if ($concert) {
-            $artiste_id = (string)$concert->artiste_id;
-            $scene_id = (string)$concert->scene_id;
-            $heure_debut = $concert->heure_debut->toDateTime()->format('Y-m-d\TH:i');
-            $heure_fin = $concert->heure_fin->toDateTime()->format('Y-m-d\TH:i');
+        $doc = current($cursor->toArray());
+        if ($doc) {
+            $artiste_id = (string)$doc->artiste_id;
+            $scene_id = (string)$doc->scene_id;
+            $heure_debut = $doc->heure_debut->toDateTime()->format('Y-m-d\TH:i');
+            $heure_fin = $doc->heure_fin->toDateTime()->format('Y-m-d\TH:i');
             $pageTitle = "Modifier le concert";
         }
     } catch(Exception $e) {}
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Conversion Date HTML -> MongoDB Date
     $start = new MongoDB\BSON\UTCDateTime(strtotime($_POST['heure_debut']) * 1000);
     $end = new MongoDB\BSON\UTCDateTime(strtotime($_POST['heure_fin']) * 1000);
 
-    $document = [
+    $data = [
         'artiste_id' => new MongoDB\BSON\ObjectId($_POST['artiste_id']),
         'scene_id' => new MongoDB\BSON\ObjectId($_POST['scene_id']),
         'heure_debut' => $start,
@@ -42,15 +40,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
 
     $bulk = new MongoDB\Driver\BulkWrite;
-    if ($id) $bulk->update(['_id' => $id], ['$set' => $document]);
-    else     $bulk->insert($document);
+    if ($id) $bulk->update(['_id' => $id], ['$set' => $data]);
+    else     $bulk->insert($data);
 
     $manager->executeBulkWrite('tokafest_db.concerts', $bulk);
     header("Location: dashboard.php");
     exit;
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -68,15 +65,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="admin-card" style="max-width: 600px; margin: 0 auto;">
             <div class="card-header"><h2><?php echo $pageTitle; ?></h2></div>
             <form method="post">
-                <div class="form-group"><label class="form-label">Artiste</label>
+                <div class="form-group">
+                    <label class="form-label">Artiste</label>
                     <select name="artiste_id" class="form-input" required>
-                        <option value="">-- Choisir un artiste --</option>
+                        <option value="">-- Choisir --</option>
                         <?php foreach($artistes as $a): ?><option value="<?php echo $a->_id; ?>" <?php if((string)$a->_id == $artiste_id) echo 'selected'; ?>><?php echo $a->nom_scene_artiste; ?></option><?php endforeach; ?>
                     </select>
                 </div>
-                <div class="form-group"><label class="form-label">Scène</label>
+                <div class="form-group">
+                    <label class="form-label">Scène</label>
                     <select name="scene_id" class="form-input" required>
-                        <option value="">-- Choisir une scène --</option>
+                        <option value="">-- Choisir --</option>
                         <?php foreach($scenes as $s): ?><option value="<?php echo $s->_id; ?>" <?php if((string)$s->_id == $scene_id) echo 'selected'; ?>><?php echo $s->nom_scene; ?></option><?php endforeach; ?>
                     </select>
                 </div>

@@ -8,46 +8,43 @@ $id = null;
 $nom = ""; $prenom = ""; $telephone = ""; $equipe = ""; $scene_assignee_id = "";
 $pageTitle = "Ajouter un Bénévole";
 
-// Mode MODIFICATION
 if (isset($_GET['id'])) {
     try {
         $id = new MongoDB\BSON\ObjectId($_GET['id']);
         $cursor = $manager->executeQuery('tokafest_db.benevoles', new MongoDB\Driver\Query(['_id' => $id]));
-        $benevole = current($cursor->toArray());
-        if ($benevole) {
-            $nom = $benevole->nom;
-            $prenom = $benevole->prenom;
-            $telephone = $benevole->telephone;
-            $equipe = $benevole->equipe;
-            if (isset($benevole->scene_assignee_id)) $scene_assignee_id = (string)$benevole->scene_assignee_id;
+        $doc = current($cursor->toArray());
+        if ($doc) {
+            $nom = $doc->nom;
+            $prenom = $doc->prenom;
+            $telephone = $doc->telephone;
+            $equipe = $doc->equipe;
+            if (isset($doc->scene_assignee_id)) $scene_assignee_id = (string)$doc->scene_assignee_id;
             $pageTitle = "Modifier " . $prenom . " " . $nom;
         }
     } catch (Exception $e) {}
 }
 
-// Liste Scènes
 $scenes = $manager->executeQuery('tokafest_db.scenes', new MongoDB\Driver\Query([], ['sort' => ['nom_scene' => 1]]))->toArray();
 
-// POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $newSceneObjectId = !empty($_POST['scene_id']) ? new MongoDB\BSON\ObjectId($_POST['scene_id']) : null;
-    $document = [
+    $sceneObj = !empty($_POST['scene_id']) ? new MongoDB\BSON\ObjectId($_POST['scene_id']) : null;
+    $data = [
         'nom' => $_POST['nom'],
         'prenom' => $_POST['prenom'],
         'telephone' => $_POST['telephone'],
         'equipe' => $_POST['equipe'],
-        'scene_assignee_id' => $newSceneObjectId
+        'scene_assignee_id' => $sceneObj
     ];
+
     $bulk = new MongoDB\Driver\BulkWrite;
-    if ($id) $bulk->update(['_id' => $id], ['$set' => $document]);
-    else     $bulk->insert($document);
+    if ($id) $bulk->update(['_id' => $id], ['$set' => $data]);
+    else     $bulk->insert($data);
 
     $manager->executeBulkWrite('tokafest_db.benevoles', $bulk);
     header("Location: dashboard.php");
     exit;
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
