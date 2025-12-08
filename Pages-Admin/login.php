@@ -7,7 +7,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
     try {
-        // La connexion MongoDB marche toujours car localhost est absolu
         $manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
         $query = new MongoDB\Driver\Query(['username' => $username]);
         $cursor = $manager->executeQuery('tokafest_db.admins', $query);
@@ -16,7 +15,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($user && password_verify($password, $user->password)) {
             $_SESSION['admin_logged_in'] = true;
             $_SESSION['admin_name'] = $user->username;
-            // Redirection vers le fichier qui est dans le MÊME dossier
             header("Location: dashboard.php");
             exit;
         } else {
@@ -25,6 +23,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } catch (Exception $e) {
         $message = "Erreur de connexion.";
     }
+
+
 }
 ?>
 
@@ -43,11 +43,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="login-wrapper">
         <div class="login-box">
             <h2>Admin Access</h2>
-            
-            <?php if($message): ?>
-                <p class="error-msg">⚠️ <?php echo $message; ?></p>
-            <?php endif; ?>
-
             <form method="post">
                 <div class="form-group">
                     <label class="form-label">Identifiant</label>
