@@ -33,7 +33,7 @@ session_start();
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="index.php#histoire">Présentation</a></li>
                         <li><a class="dropdown-item" href="index.php#themes">Images</a></li>
-                        <li><a class="dropdown-item" href="Pages-Benevoles/index.php">Benevoles</a></li>
+                        <li><a class="dropdown-item" href="Pages-Benevoles/InscriptionBenevole.php">Benevoles</a></li>
                         <?php if (isset($_SESSION['user_id'])): ?>
                             <li><a class="dropdown-item" href="Pages-Admin/dashboard.php">Dashboard</a></li>
                         <?php else: ?>
