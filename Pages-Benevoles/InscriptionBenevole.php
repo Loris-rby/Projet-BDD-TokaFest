@@ -80,42 +80,12 @@ session_start();
             transition: all 0.3s;
             margin-top: 20px;
         }
-
-        .btn-submit:hover {
-            background-color: #4A00E0;
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(123, 97, 255, 0.4);
-        }
-
-        .btn-submit:active {
-            transform: scale(0.98);
-        }
-
         .form-text {
             color: rgba(255, 111, 163, 0.8);
             font-size: 0.85rem;
             margin-top: 5px;
         }
 
-        .success-message {
-            display: none;
-            background-color: rgba(123, 97, 255, 0.2);
-            border-left: 4px solid #7B61FF;
-            color: #ffffff;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-        .error-message {
-            display: none;
-            background-color: rgba(255, 111, 163, 0.2);
-            border-left: 4px solid #FF6FA3;
-            color: #ffffff;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
 
         .back-link {
             text-align: center;
@@ -188,143 +158,21 @@ session_start();
         <p>Aidez-nous à créer une expérience inoubliable pour tous !</p>
     </div>
 
-    <!-- Formulaire d'inscription -->
-    <div class="inscription-container">
-        <div id="successMessage" class="success-message">
-            ✓ Inscription réussie ! Merci de votre engagement.
-        </div>
-        <div id="errorMessage" class="error-message">
-            ✗ Une erreur s'est produite. Veuillez réessayer.
-        </div>
+    
 
-        <h2>Formulaire d'Inscription</h2>
-        <form id="inscriptionForm">
-            <div class="form-group">
-                <label for="nom">Nom complet *</label>
-                <input type="text" class="form-control" id="nom" name="nom" required placeholder="Votre nom et prénom">
-            </div>
-
-            <div class="form-group">
-                <label for="email">Adresse email *</label>
-                <input type="email" class="form-control" id="email" name="email" required placeholder="votre.email@example.com">
-                <small class="form-text">Nous utiliserons cet email pour vous contacter.</small>
-            </div>
-
-            <div class="form-group">
-                <label for="telephone">Téléphone *</label>
-                <input type="tel" class="form-control" id="telephone" name="telephone" required placeholder="06 XX XX XX XX">
-            </div>
-
-            <div class="form-group">
-                <label for="age">Âge *</label>
-                <input type="number" class="form-control" id="age" name="age" min="18" max="120" required placeholder="18">
-                <small class="form-text">Vous devez avoir au moins 18 ans.</small>
-            </div>
-
-            <div class="form-group">
-                <label for="domaine">Domaine d'intérêt *</label>
-                <select class="form-control" id="domaine" name="domaine" required>
-                    <option value="">-- Sélectionnez un domaine --</option>
-                    <option value="organisation">Organisation et logistique</option>
-                    <option value="scene">Gestion de scène</option>
-                    <option value="securite">Sécurité</option>
-                    <option value="accueil">Accueil et information</option>
-                    <option value="communication">Communication et médias</option>
-                    <option value="autre">Autre</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="experience">Avez-vous une expérience antérieure ?</label>
-                <textarea class="form-control" id="experience" name="experience" placeholder="Décrivez vos expériences précédentes (optionnel)"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="motivation">Pourquoi voulez-vous nous rejoindre ? *</label>
-                <textarea class="form-control" id="motivation" name="motivation" required placeholder="Parlez-nous de votre motivation..."></textarea>
-            </div>
-
-            <div class="form-group">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="conditions" name="conditions" required>
-                    <label class="form-check-label" for="conditions">
-                        J'accepte les <a href="#" style="color: #FF6FA3;">conditions d'utilisation</a> *
-                    </label>
-                </div>
-            </div>
-
-            <button type="submit" class="btn-submit">S'inscrire</button>
-        </form>
+        <h2>Veuillez contacter nos responsables Bénévoles du festival :</h2>
+        <p> 07 88 90 56 64</p>
 
         <div class="back-link">
             <a href="../index.php">← Retour à l'accueil</a>
         </div>
-    </div>
+
 
     <!-- Script Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
             crossorigin="anonymous"></script>
 
-    <script>
-        document.getElementById('inscriptionForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            // Récupérer les données du formulaire
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData);
-
-            try {
-                // Exemple d'envoi vers un serveur (à adapter selon votre backend)
-                const response = await fetch('../api/inscription-benevole.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                if (response.ok) {
-                    document.getElementById('successMessage').style.display = 'block';
-                    document.getElementById('inscriptionForm').reset();
-                    setTimeout(() => {
-                        document.getElementById('successMessage').style.display = 'none';
-                    }, 5000);
-                } else {
-                    document.getElementById('errorMessage').style.display = 'block';
-                    setTimeout(() => {
-                        document.getElementById('errorMessage').style.display = 'none';
-                    }, 5000);
-                }
-            } catch (error) {
-                console.error('Erreur:', error);
-                document.getElementById('errorMessage').style.display = 'block';
-                setTimeout(() => {
-                    document.getElementById('errorMessage').style.display = 'none';
-                }, 5000);
-            }
-        });
-
-        // Validation en temps réel
-        document.getElementById('email').addEventListener('blur', function() {
-            const email = this.value;
-            const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-            if (!isValid && email !== '') {
-                this.style.borderColor = '#FF6FA3';
-            } else {
-                this.style.borderColor = 'rgba(123, 97, 255, 0.4)';
-            }
-        });
-
-        document.getElementById('telephone').addEventListener('blur', function() {
-            const phone = this.value;
-            const isValid = /^(\+33|0)[1-9](\d{8})$/.test(phone.replace(/\s/g, ''));
-            if (!isValid && phone !== '') {
-                this.style.borderColor = '#FF6FA3';
-            } else {
-                this.style.borderColor = 'rgba(123, 97, 255, 0.4)';
-            }
-        });
     </script>
 </body>
 </html>
