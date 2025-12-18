@@ -158,9 +158,10 @@ session_start();
         <p>Aidez-nous à créer une expérience inoubliable pour tous !</p>
     </div>
 
-    
-        <h2>Veuillez contacter nos responsables Bénévoles du festival :</h2>
-        <p> 07 88 90 56 64</p>
+        <div style="text-align: center; margin: 30px 0;">
+            <h2 style="font-size: 18px ;">Veuillez contacter nos responsables Bénévoles du festival :</h2>
+            <p style="font-size: 14px; color: #f5c9d9ff;"> 07 88 90 56 64</p>
+        </div>
 
         <div class="back-link">
             <a href="../index.php">← Retour à l'accueil</a>

@@ -21,6 +21,7 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
             case 'delete_concert':  $collection = 'tokafest_db.concerts'; break;
             case 'delete_scene':    $collection = 'tokafest_db.scenes'; break;
             case 'delete_benevole': $collection = 'tokafest_db.benevoles'; break;
+            case 'delete_stand':    $collection = 'tokafest_db.stands'; break;
         }
 
         if ($collection) {
@@ -64,12 +65,22 @@ foreach ($programmation as $p) {
 $cursorBenevoles = $manager->executeQuery('tokafest_db.benevoles', new MongoDB\Driver\Query([], ['sort' => ['nom' => 1]]));
 $benevoles = $cursorBenevoles->toArray();
 
+// Festivaliers
+$cursorFestivaliers = $manager->executeQuery('tokafest_db.festivaliers', new MongoDB\Driver\Query([], ['sort' => ['nom' => 1]]));
+$festivaliers = $cursorFestivaliers->toArray();
+
+// Stands
+$cursorStands = $manager->executeQuery('tokafest_db.stands', new MongoDB\Driver\Query([], ['sort' => ['nom_stand' => 1]]));
+$stands = $cursorStands->toArray();
+
 // --- Statistiques ---
 $stats = [
     'artistes'  => count($artistes),
     'concerts'  => count($programmation),
     'scenes'    => count($scenes),
-    'benevoles' => count($benevoles)
+    'benevoles' => count($benevoles),
+    'festivaliers' => count($festivaliers),
+    'stands'    => count($stands)
 ];
 
 function formatDuree($debut, $fin) {
@@ -224,7 +235,7 @@ function formatDuree($debut, $fin) {
                         <td style="color: #7B61FF; font-weight: bold;"><?php echo $s->nom_scene; ?></td>
                         <td style="font-size: 0.9em; color: #aaa;">
                             👥 <?php echo number_format($s->capacite_max, 0, ',', ' '); ?><br>
-                            <?php echo $s->est_couverte ? "⛺ Couverte" : "☀ Plein air"; ?>
+                            <?php echo $s->est_couverte ? "☂︎ Couverte" : "☀ Plein air"; ?>
                         </td>
                         <td>
                             <?php if(isset($concertsByScene[$sid])): ?>
@@ -236,6 +247,37 @@ function formatDuree($debut, $fin) {
                         <td>
                             <a href="scene_edit.php?id=<?php echo $sid; ?>" class="btn-delete" style="color:white; border-color:#7B61FF;">Modifier</a>
                             <a href="dashboard.php?action=delete_scene&id=<?php echo $sid; ?>" class="btn-delete" onclick="return confirm('Supprimer cette scène ?');">X</a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="admin-card">
+            <div class="section-header">
+                <h2>🛍️ Stands</h2>
+                <a href="stand_edit.php" class="btn-add">＋ Nouveau Stand</a>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Nom du Stand</th>
+                        <th>Type</th>
+                        <th>Ouvert</th>
+                        <th>Proprietaire</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach($stands as $st): ?>
+                    <tr>
+                        <td style="font-weight: bold; color: white;"><?php echo $st->nom_stand; ?></td>
+                        <td><span class="badge"><?php echo $st->type_stand; ?></span></td>
+                        <td><?php echo $st->ouvert ? "✓ Ouvert" : "✗ Fermé"; ?></td>
+                        <td><?php echo htmlspecialchars($st->proprietaire->nom_proprioStand . " ( " . $st->proprietaire->num_proprioStand . " )"); ?></td>
+                        <td>
+                            <a href="stand_edit.php?id=<?php echo $st->_id; ?>" class="btn-delete" style="color:white; border-color:#7B61FF;">Modifier</a>
+                            <a href="dashboard.php?action=delete_stand&id=<?php echo $st->_id; ?>" class="btn-delete" onclick="return confirm('Supprimer ce stand ?');">X</a>
                         </td>
                     </tr>
                     <?php endforeach; ?>
