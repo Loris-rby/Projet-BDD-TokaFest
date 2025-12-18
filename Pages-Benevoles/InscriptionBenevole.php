@@ -159,7 +159,6 @@ session_start();
     </div>
 
     
-
         <h2>Veuillez contacter nos responsables Bénévoles du festival :</h2>
         <p> 07 88 90 56 64</p>
 
