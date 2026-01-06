@@ -1,6 +1,15 @@
 <?php
 session_start();
 
+require_once '../Classes/Connexion.php';
+require_once '../Classes/Manager.php';
+require_once '../Classes/ArtisteManager.php';
+require_once '../Classes/SceneManager.php';
+require_once '../Classes/ConcertManager.php';
+require_once '../Classes/BenevoleManager.php';
+require_once '../Classes/StandManager.php';
+require_once '../Classes/FestivalierManager.php';
+
 if (!isset($_SESSION['admin_logged_in'])) {
     header("Location: login.php");
     exit;
@@ -10,75 +19,94 @@ if (!isset($_SESSION['admin_logged_in'])) {
 
 $manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
 
-// Supprimer les éléments 
-
+// --- Gestion des Suppressions ---
 if (isset($_GET['action']) && isset($_GET['id'])) {
-    try {
-        $filter = ['_id' => new MongoDB\BSON\ObjectId($_GET['id'])];
-        $bulk = new MongoDB\Driver\BulkWrite;
-        $bulk->delete($filter);
+    $id = $_GET['id'];
+    $deleted = false;
 
-        $collection = '';
-        switch ($_GET['action']) {
-            case 'delete_artiste':  $collection = 'tokafest_db.artistes'; break;
-            case 'delete_concert':  $collection = 'tokafest_db.concerts'; break;
-            case 'delete_scene':    $collection = 'tokafest_db.scenes'; break;
-            case 'delete_benevole': $collection = 'tokafest_db.benevoles'; break;
-        }
+    switch ($_GET['action']) {
+        case 'delete_artiste':  
+            $deleted = $artisteManager->delete($id); 
+            break;
+        case 'delete_concert':  
+            $deleted = $concertManager->delete($id); 
+            break;
+        case 'delete_scene':    
+            $deleted = $sceneManager->delete($id); 
+            break;
+        case 'delete_benevole': 
+            $deleted = $benevoleManager->delete($id); 
+            break;
+        case 'delete_stand':    
+            $deleted = $standManager->delete($id); 
+            break;
+        case 'delete_festivalier': 
+            $deleted = $festivalierManager->delete($id); 
+            break;
+    }
 
-        if ($collection) {
-            $manager->executeBulkWrite($collection, $bulk);
-        }
-        header("Location: dashboard.php");
+    if ($deleted) {
+        header("Location: dashboard.php?msg=deleted");
         exit;
-    } catch (Exception $e) {}
+    }
 }
 
+// --- Récupération des Données ---
 
+// Artistes (Triés par Tête d'affiche, puis nom)
+$artistes = $artisteManager->findAll(['est_tete_affiche' => -1, 'nom_scene_artiste' => 1]);
 
-
-
-
-// Récupération de données 
-
-// Artistes
-$cursorArtistes = $manager->executeQuery('tokafest_db.artistes', new MongoDB\Driver\Query([], ['sort' => ['est_tete_affiche' => -1, 'nom_scene_artiste' => 1]]));
-$artistes = $cursorArtistes->toArray();
-
+// Map pour les noms (Logique de vue conservée)
 $artistesMap = [];
 foreach ($artistes as $a) $artistesMap[(string)$a->_id] = $a->nom_scene_artiste;
 
 // Scènes
-$cursorScenes = $manager->executeQuery('tokafest_db.scenes', new MongoDB\Driver\Query([], ['sort' => ['nom_scene' => 1]]));
-$scenes = $cursorScenes->toArray();
+$scenes = $sceneManager->findAll(['nom_scene' => 1]);
 
 $scenesMap = [];
 foreach($scenes as $s) $scenesMap[(string)$s->_id] = $s->nom_scene;
 
-// Concerts 
+// Concerts (Line-up)
 $cursorProg = $manager->executeQuery('tokafest_db.concerts', new MongoDB\Driver\Query([], ['sort' => ['heure_debut' => 1]]));
 $programmation = $cursorProg->toArray();
 
+// Préparation de l'affichage des concerts par scène
 $concertsByScene = [];
 foreach ($programmation as $p) {
     $sid = (string)$p->scene_id;
     $aid = (string)$p->artiste_id;
     $nomArtiste = $artistesMap[$aid] ?? "Inconnu";
-    $heure = $p->heure_debut->toDateTime()->format('H:i');
+    
+    // Gestion sécurisée de la date
+    $heure = "??:??";
+    if (isset($p->heure_debut)) {
+        // Conversion BSON Date -> PHP DateTime
+        $heure = $p->heure_debut->toDateTime()->format('H:i');
+    }
+    
     $concertsByScene[$sid][] = "<span style='color:#ccc'>$heure</span> <strong>$nomArtiste</strong>";
 }
 
 // Bénévoles
-$cursorBenevoles = $manager->executeQuery('tokafest_db.benevoles', new MongoDB\Driver\Query([], ['sort' => ['nom' => 1]]));
-$benevoles = $cursorBenevoles->toArray();
+$benevoles = $benevoleManager->findAll(['nom' => 1]);
 
-// Stats
+// Stands
+$stands = $standManager->findAll(['nom_stand' => 1]);
+
+// Festivaliers
+$tousLesFestivaliers = $festivalierManager->findAll(['nom_complet' => 1]);
+
+
+// --- Statistiques ---
 $stats = [
-    'artistes'  => count($artistes),
-    'concerts'  => count($programmation),
-    'scenes'    => count($scenes),
-    'benevoles' => count($benevoles)
+    'artistes'     => count($artistes),
+    'concerts'     => count($programmation),
+    'scenes'       => count($scenes),
+    'benevoles'    => count($benevoles),
+    'festivaliers' => count($tousLesFestivaliers),
+    'stands'       => count($stands)
 ];
+
 
 
 
@@ -100,6 +128,7 @@ function formatDuree($debut, $fin) {
     <link rel="stylesheet" href="../css/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* Ton CSS inline original conservé */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px; }
         .stat-card { background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; border-left: 4px solid #7B61FF; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .stat-number { font-size: 2.5em; font-weight: bold; color: white; margin: 0; }
@@ -110,6 +139,8 @@ function formatDuree($debut, $fin) {
         .badge-headliner { background-color: #F1C40F; color: black; font-weight: bold; }
         .list-concerts { list-style: none; padding: 0; margin: 0; font-size: 0.9em; }
         .list-concerts li { margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid #222; }
+        .badge-purple { background-color: #7B61FF; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; }
+        .badge { padding: 2px 8px; border-radius: 4px; font-size: 0.8em; background: #333; color: white; }
     </style>
 </head>
 <body>
@@ -117,7 +148,7 @@ function formatDuree($debut, $fin) {
     <nav class="admin-nav">
         <a href="dashboard.php" class="brand-title">TokaFest <span class="brand-subtitle">| Dashboard</span></a>
         <div class="user-info">
-            Admin: <strong><?php echo $_SESSION['admin_name']; ?></strong>
+            Admin: <strong><?php echo isset($_SESSION['admin_name']) ? $_SESSION['admin_name'] : 'Admin'; ?></strong>
             <a href="logout.php" class="btn-logout" style="margin-left: 15px;">Déconnexion</a>
         </div>
     </nav>
@@ -203,7 +234,7 @@ function formatDuree($debut, $fin) {
                     ?>
                     <tr>
                         <td style="color: #ccc; font-family: monospace;">
-                            <span style="color: #7B61FF; font-weight:bold;"><?php echo $debut->format('H:i'); ?></span> 
+                            <span style="font-weight:bold;"><?php echo $debut->format('H:i'); ?></span> 
                             <small>(<?php echo $debut->format('d/m'); ?>)</small>
                         </td>
                         <td style="font-weight: bold; color: white;"><?php echo $artistesMap[$aId] ?? "Inconnu"; ?></td>
@@ -236,10 +267,10 @@ function formatDuree($debut, $fin) {
                 <tbody>
                     <?php foreach($scenes as $s): $sid = (string)$s->_id; ?>
                     <tr>
-                        <td style="color: #7B61FF; font-weight: bold;"><?php echo $s->nom_scene; ?></td>
+                        <td style="font-weight: bold;"><?php echo $s->nom_scene; ?></td>
                         <td style="font-size: 0.9em; color: #aaa;">
                             👥 <?php echo number_format($s->capacite_max, 0, ',', ' '); ?><br>
-                            <?php echo $s->est_couverte ? "Couverte" : "Plein air"; ?>
+                            <?php echo $s->est_couverte ? "⛺ Couverte" : "☀ Plein air"; ?>
                         </td>
                         <td>
                             <?php if(isset($concertsByScene[$sid])): ?>
@@ -251,6 +282,37 @@ function formatDuree($debut, $fin) {
                         <td>
                             <a href="scene_edit.php?id=<?php echo $sid; ?>" class="btn-delete" style="color:white; border-color:#7B61FF;">Modifier</a>
                             <a href="dashboard.php?action=delete_scene&id=<?php echo $sid; ?>" class="btn-delete" onclick="return confirm('Supprimer cette scène ?');">X</a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="admin-card">
+            <div class="section-header">
+                <h2>🛍️ Stands</h2>
+                <a href="stand_edit.php" class="btn-add">＋ Nouveau Stand</a>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Nom du Stand</th>
+                        <th>Type</th>
+                        <th>Ouvert</th>
+                        <th>Proprietaire</th>
+                        <th>Actions</th> 
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach($stands as $st): ?>
+                    <tr>
+                        <td style="font-weight: bold; color: white;"><?php echo $st->nom_stand; ?></td>
+                        <td><span class="badge"><?php echo $st->type_stand; ?></span></td>
+                        <td><?php echo $st->ouvert ? "✓ Ouvert" : "✗ Fermé"; ?></td>
+                        <td><?php echo $st->proprietaire->nom_proprioStand . " ( " . $st->proprietaire->num_proprioStand . " )"; ?></td>                        <td>
+                            <a href="stand_edit.php?id=<?php echo $st->_id; ?>" class="btn-delete" style="color:white; border-color:#7B61FF;">Modifier</a>
+                            <a href="dashboard.php?action=delete_stand&id=<?php echo $st->_id; ?>" class="btn-delete" onclick="return confirm('Supprimer ce stand ?');">X</a>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -283,6 +345,74 @@ function formatDuree($debut, $fin) {
                         <td>
                             <a href="benevole_edit.php?id=<?php echo $b->_id; ?>" class="btn-delete" style="color:white; border-color:#7B61FF;">Modifier</a>
                             <a href="dashboard.php?action=delete_benevole&id=<?php echo $b->_id; ?>" class="btn-delete" onclick="return confirm('Supprimer ce bénévole ?');">X</a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+
+            </table>
+        </div>
+
+<div class="admin-card">
+            <div class="section-header">
+                <h2>🎫 Festivaliers & Billetterie</h2>
+                <a href="festivalier_edit.php" class="btn-add">＋ Nouveau</a>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Identité</th>
+                        <th>Ville</th>
+                        <th width="40%">Détails des Billets (Type - Statut - Hash)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php 
+                    if (!isset($tousLesFestivaliers)) {
+                        $tousLesFestivaliers = $festivalierManager->findAll(['nom_complet' => 1]);
+                    }
+                    
+                    foreach($tousLesFestivaliers as $f): 
+                        $ville = isset($f->adresse->ville) ? $f->adresse->ville : '—';
+                        $billets = isset($f->billets_achetes) ? $f->billets_achetes : [];
+                    ?>
+                    <tr>
+                        <td>
+                            <strong style="color: white;"><?php echo $f->nom_complet; ?></strong><br>
+                            <small style="color: #aaa;"><?php echo $f->email; ?></small>
+                        </td>
+                        
+                        <td><?php echo $ville; ?></td>
+                        
+                        <td>
+                            <?php if(count($billets) > 0): ?>
+                                <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85em;">
+                                <?php foreach($billets as $b): 
+                                    $type = $b->type_billet ?? 'Inconnu';
+                                    $isValide = $b->qr_code_data->validation->est_valide ?? false;
+                                    $hash = $b->qr_code_data->hash_billet ?? 'N/A';
+                                    
+                                    // Couleur selon validité
+                                    $color = $isValide ? '#2ed573' : '#ff4757';
+                                    $statutTxt = $isValide ? 'VALIDE' : 'INVALIDE';
+                                ?>
+                                    <li style="margin-bottom: 5px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 4px;">
+                                        <span style="color: #7B61FF; font-weight:bold;"><?php echo $type; ?></span>
+                                        <span style="color: <?php echo $color; ?>; font-weight:bold; margin: 0 5px;">[<?php echo $statutTxt; ?>]</span>
+                                        <br>
+                                        <span style="font-family: monospace; color: #ccc;">Hash: <?php echo $hash; ?></span>
+                                    </li>
+                                <?php endforeach; ?>
+                                </ul>
+                            <?php else: ?>
+                                <span style="color:#555; font-style: italic;">Aucun billet</span>
+                            <?php endif; ?>
+                        </td>
+
+                        <td>
+                            <a href="festivalier_edit.php?id=<?php echo $f->_id; ?>" class="btn-delete" style="color:white; border-color:#7B61FF;">Consult.</a>
+                            <a href="dashboard.php?action=delete_festivalier&id=<?php echo $f->_id; ?>" class="btn-delete" onclick="return confirm('Supprimer ce festivalier ?');">X</a>
                         </td>
                     </tr>
                     <?php endforeach; ?>

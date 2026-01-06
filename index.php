@@ -70,16 +70,13 @@ session_start();
                     de ceux qui aiment la musique électronique pointue, celle qui fait voyager les esprits et bouger les corps jusqu'au lever du 
                     soleil. La programmation est toujours un savant mélange entre des têtes d'affiche que tout le monde veut voir, et des jeunes 
                     talents qui sont la relève de demain. C'est l'occasion parfaite de dire : "J'y étais avant que ça devienne trop connu !"
-
-                    En gros, si vous cherchez une expérience électro authentique, conviviale et pleine de bonnes vibes, le tout dans un cadre naturel 
-                    magnifique qui sent bon les vacances... le TokaFest est votre nouvelle destination incontournable. Préparez-vous à une immersion totale, 
-                    où la musique, l'art et la fête se rencontrent pour créer des souvenirs inoubliables sous le ciel étoilé de la Dordogne !
                 </p>
             </div>
             <div class="col-md-6 d-flex align-items-center justify-content-center">
                 <img src="images/1.jpeg" alt="img de paysage" class="img-fluid half-width">
             </div>
         </div>
+
         <!-- Deuxième rangée : Image à gauche, Paragraphe à droite -->
         <div class="row">
             <div class="col-md-6 d-flex align-items-center justify-content-center">
@@ -87,7 +84,7 @@ session_start();
             </div>
             <div class="col-md-6 text-light paragraphedeux">
                 <p>
-                    <br><br><br><b>À qui s’adresse Planète Locale ? </b><br><br>
+                    <br><br><br><b>Mais qui est la Tokazic Family ? </b><br><br>
                     Nous visons tous les acteurs engagés dans la protection de l’environnement, notamment :<br>
                     <b>Les citoyens engagés :</b> ceux qui souhaitent participer activement à des actions locales et
                     contribuer à leur communauté.<br>
@@ -107,9 +104,9 @@ session_start();
 <section id="themes">
     <br><br><br><h2 class="titre-theme">Retours en images</h2>
     <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner"> <!--on va créer l'intérieur du carousel-->
-            <div class="carousel-item active"> <!--on va mettre l'image et on ajoute "active" pour faire apparaître cette diapo en premier-->
-                <img src="images/16.jpg" class="d-block w-100" alt="image d'une action 1"> <!--d-block = display:block-->
+        <div class="carousel-inner"> 
+            <div class="carousel-item active"> 
+                <img src="images/16.jpg" class="d-block w-100" alt="image d'une action 1"> 
             </div>
             <div class="carousel-item">
                 <img src="images/15.jpg" class="d-block w-100" alt="image d'une action 2">
@@ -118,9 +115,9 @@ session_start();
                 <img src="images/17.jpg" class="d-block w-100" alt="image d'une action 3 ">
             </div>
         </div>
-        <!--on va créer dessous les flèches gauche et droite-->
+
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span> <!--Ajoute un bouton gauche au carousel-->
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span> 
             <span class="visually-hidden">Previous</span>
         </button>
         <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
