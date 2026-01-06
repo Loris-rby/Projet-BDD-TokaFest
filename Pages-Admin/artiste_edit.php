@@ -1,8 +1,15 @@
 <?php
 session_start();
-if (!isset($_SESSION['admin_logged_in'])) { header("Location: login.php"); exit; }
 
-$manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+require_once '../Classes/Connexion.php';
+require_once '../Classes/Manager.php';
+require_once '../Classes/ArtisteManager.php';
+
+if (!isset($_SESSION['admin_logged_in'])) { 
+    header("Location: login.php"); 
+    exit; 
+}
+$artisteManager = new ArtisteManager();
 
 $id = null;
 $nom_artiste = ""; 
@@ -10,44 +17,41 @@ $genre = "";
 $est_tete_affiche = false;
 $pageTitle = "Ajouter un Artiste";
 
+// --- Modification---
 if (isset($_GET['id'])) {
-    try {
-        $id = new MongoDB\BSON\ObjectId($_GET['id']);
-        $cursor = $manager->executeQuery('tokafest_db.artistes', new MongoDB\Driver\Query(['_id' => $id]));
-        $doc = current($cursor->toArray());
-        if ($doc) {
-            $nom_artiste = $doc->nom_scene_artiste;
-            $genre = $doc->genre_musical;
-            $est_tete_affiche = $doc->est_tete_affiche ?? false;
-            $pageTitle = "Modifier : " . $nom_artiste;
-        }
-    } catch(Exception $e) {}
+    $id = $_GET['id'];
+    $doc = $artisteManager->findById($id);
+    
+    if ($doc) {
+        $nom_artiste = $doc->nom_scene_artiste;
+        $genre = $doc->genre_musical;
+        $est_tete_affiche = $doc->est_tete_affiche ?? false;
+        $pageTitle = "Modifier : " . $nom_artiste;
+    }
 }
 
+// --- Nouvel artiste ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    
     $data = [
         'nom_scene_artiste' => $_POST['nom_scene_artiste'],
-        'genre_musical' => $_POST['genre_musical'],
-        'est_tete_affiche' => isset($_POST['est_tete_affiche']),
-        'membres' => [], 'discographie' => []
+        'genre_musical'     => $_POST['genre_musical'],
+        'est_tete_affiche'  => isset($_POST['est_tete_affiche'])
     ];
 
-    $bulk = new MongoDB\Driver\BulkWrite;
     if ($id) {
-        $bulk->update(['_id' => $id], ['$set' => [
-            'nom_scene_artiste' => $_POST['nom_scene_artiste'],
-            'genre_musical' => $_POST['genre_musical'],
-            'est_tete_affiche' => isset($_POST['est_tete_affiche'])
-        ]]);
+        $artisteManager->update($id, $data);
     } else {
-        $bulk->insert($data);
+        $data['membres'] = [];
+        $data['discographie'] = [];
+        $artisteManager->create($data);
     }
 
-    $manager->executeBulkWrite('tokafest_db.artistes', $bulk);
     header("Location: dashboard.php");
     exit;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -59,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <nav class="admin-nav">
         <a href="dashboard.php" class="brand-title">TokaFest <span class="brand-subtitle">| Artistes</span></a>
-        <div class="user-info">Admin: <?php echo $_SESSION['admin_name']; ?></div>
+        <div class="user-info">Admin: <?php echo isset($_SESSION['admin_name']) ? $_SESSION['admin_name'] : 'Admin'; ?></div>
     </nav>
     <div class="admin-container">
         <div class="admin-card" style="max-width: 600px; margin: 0 auto;">

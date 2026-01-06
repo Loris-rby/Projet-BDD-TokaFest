@@ -1,87 +1,113 @@
 <?php
 session_start();
 
+require_once '../Classes/Connexion.php';
+require_once '../Classes/Manager.php';
+require_once '../Classes/ArtisteManager.php';
+require_once '../Classes/SceneManager.php';
+require_once '../Classes/ConcertManager.php';
+require_once '../Classes/BenevoleManager.php';
+require_once '../Classes/StandManager.php';
+
 if (!isset($_SESSION['admin_logged_in'])) {
     header("Location: login.php");
     exit;
 }
 
-$manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+$artisteManager  = new ArtisteManager();
+$sceneManager    = new SceneManager();
+$concertManager  = new ConcertManager();
+$benevoleManager = new BenevoleManager();
+$standManager    = new StandManager();
 
-// --- Gestion des Suppressions ---
+$db = Connexion::getInstance()->getManager(); 
+
+// --- Suppressions---
 if (isset($_GET['action']) && isset($_GET['id'])) {
-    try {
-        $filter = ['_id' => new MongoDB\BSON\ObjectId($_GET['id'])];
-        $bulk = new MongoDB\Driver\BulkWrite;
-        $bulk->delete($filter);
+    $id = $_GET['id'];
+    $deleted = false;
 
-        $collection = '';
-        switch ($_GET['action']) {
-            case 'delete_artiste':  $collection = 'tokafest_db.artistes'; break;
-            case 'delete_concert':  $collection = 'tokafest_db.concerts'; break;
-            case 'delete_scene':    $collection = 'tokafest_db.scenes'; break;
-            case 'delete_benevole': $collection = 'tokafest_db.benevoles'; break;
-            case 'delete_stand':    $collection = 'tokafest_db.stands'; break;
-        }
+    switch ($_GET['action']) {
+        case 'delete_artiste':  
+            $deleted = $artisteManager->delete($id); 
+            break;
+        case 'delete_concert':  
+            $deleted = $concertManager->delete($id); 
+            break;
+        case 'delete_scene':    
+            $deleted = $sceneManager->delete($id); 
+            break;
+        case 'delete_benevole': 
+            $deleted = $benevoleManager->delete($id); 
+            break;
+        case 'delete_stand':    
+            $deleted = $standManager->delete($id); 
+            break;
+    }
 
-        if ($collection) {
-            $manager->executeBulkWrite($collection, $bulk);
-        }
-        header("Location: dashboard.php");
+    if ($deleted) {
+        header("Location: dashboard.php?msg=deleted");
         exit;
-    } catch (Exception $e) {}
+    }
 }
 
-// --- Récupération des Données ---
+// ---Récupération des Données (Via findAll) ---
 
-// Artistes
-$cursorArtistes = $manager->executeQuery('tokafest_db.artistes', new MongoDB\Driver\Query([], ['sort' => ['est_tete_affiche' => -1, 'nom_scene_artiste' => 1]]));
-$artistes = $cursorArtistes->toArray();
+// Artistes (Triés par Tête d'affiche, puis nom)
+$artistes = $artisteManager->findAll(['est_tete_affiche' => -1, 'nom_scene_artiste' => 1]);
 
+// Map pour les noms (Logique de vue conservée)
 $artistesMap = [];
 foreach ($artistes as $a) $artistesMap[(string)$a->_id] = $a->nom_scene_artiste;
 
 // Scènes
-$cursorScenes = $manager->executeQuery('tokafest_db.scenes', new MongoDB\Driver\Query([], ['sort' => ['nom_scene' => 1]]));
-$scenes = $cursorScenes->toArray();
+$scenes = $sceneManager->findAll(['nom_scene' => 1]);
 
 $scenesMap = [];
 foreach($scenes as $s) $scenesMap[(string)$s->_id] = $s->nom_scene;
 
-// Concerts (Line-up)
-$cursorProg = $manager->executeQuery('tokafest_db.concerts', new MongoDB\Driver\Query([], ['sort' => ['heure_debut' => 1]]));
-$programmation = $cursorProg->toArray();
+// Concerts
+$programmation = $concertManager->findAll(['heure_debut' => 1]);
 
+// Préparation de l'affichage des concerts par scène
 $concertsByScene = [];
 foreach ($programmation as $p) {
     $sid = (string)$p->scene_id;
     $aid = (string)$p->artiste_id;
     $nomArtiste = $artistesMap[$aid] ?? "Inconnu";
-    $heure = $p->heure_debut->toDateTime()->format('H:i');
+    
+    // Gestion sécurisée de la date
+    $heure = "??:??";
+    if (isset($p->heure_debut)) {
+        // Conversion BSON Date -> PHP DateTime
+        $heure = $p->heure_debut->toDateTime()->format('H:i');
+    }
+    
     $concertsByScene[$sid][] = "<span style='color:#ccc'>$heure</span> <strong>$nomArtiste</strong>";
 }
 
 // Bénévoles
-$cursorBenevoles = $manager->executeQuery('tokafest_db.benevoles', new MongoDB\Driver\Query([], ['sort' => ['nom' => 1]]));
-$benevoles = $cursorBenevoles->toArray();
-
-// Festivaliers
-$cursorFestivaliers = $manager->executeQuery('tokafest_db.festivaliers', new MongoDB\Driver\Query([], ['sort' => ['nom' => 1]]));
-$festivaliers = $cursorFestivaliers->toArray();
+$benevoles = $benevoleManager->findAll(['nom' => 1]);
 
 // Stands
-$cursorStands = $manager->executeQuery('tokafest_db.stands', new MongoDB\Driver\Query([], ['sort' => ['nom_stand' => 1]]));
-$stands = $cursorStands->toArray();
+$stands = $standManager->findAll(['nom_stand' => 1]);
 
-// --- Statistiques ---
+// Festivaliers
+$cmd = new MongoDB\Driver\Command(["count" => "festivaliers"]);
+$res = $db->executeCommand('tokafest_db', $cmd);
+$countFestivaliers = $res->toArray()[0]->n;
+
+
+// ---Statistiques ---
 $stats = [
-    'artistes'  => count($artistes),
-    'concerts'  => count($programmation),
-    'scenes'    => count($scenes),
-    'benevoles' => count($benevoles),
-    'festivaliers' => count($festivaliers),
-    'stands'    => count($stands)
+    'artistes'     => count($artistes),
+    'concerts'     => count($programmation),
+    'scenes'       => count($scenes),
+    'benevoles'    => count($benevoles),
+    'festivaliers' => $countFestivaliers, 
+    'stands'       => count($stands)
 ];
+
 
 function formatDuree($debut, $fin) {
     return floor(($fin->getTimestamp() - $debut->getTimestamp()) / 60) . ' min';
@@ -96,6 +122,7 @@ function formatDuree($debut, $fin) {
     <link rel="stylesheet" href="../css/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* Ton CSS inline original conservé */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px; }
         .stat-card { background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; border-left: 4px solid #7B61FF; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .stat-number { font-size: 2.5em; font-weight: bold; color: white; margin: 0; }
@@ -106,6 +133,8 @@ function formatDuree($debut, $fin) {
         .badge-headliner { background-color: #F1C40F; color: black; font-weight: bold; }
         .list-concerts { list-style: none; padding: 0; margin: 0; font-size: 0.9em; }
         .list-concerts li { margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid #222; }
+        .badge-purple { background-color: #7B61FF; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; }
+        .badge { padding: 2px 8px; border-radius: 4px; font-size: 0.8em; background: #333; color: white; }
     </style>
 </head>
 <body>
@@ -113,7 +142,7 @@ function formatDuree($debut, $fin) {
     <nav class="admin-nav">
         <a href="dashboard.php" class="brand-title">TokaFest <span class="brand-subtitle">| Dashboard</span></a>
         <div class="user-info">
-            Admin: <strong><?php echo $_SESSION['admin_name']; ?></strong>
+            Admin: <strong><?php echo isset($_SESSION['admin_name']) ? $_SESSION['admin_name'] : 'Admin'; ?></strong>
             <a href="logout.php" class="btn-logout" style="margin-left: 15px;">Déconnexion</a>
         </div>
     </nav>
@@ -266,6 +295,7 @@ function formatDuree($debut, $fin) {
                         <th>Type</th>
                         <th>Ouvert</th>
                         <th>Proprietaire</th>
+                        <th>Actions</th> 
                     </tr>
                 </thead>
                 <tbody>
@@ -274,8 +304,7 @@ function formatDuree($debut, $fin) {
                         <td style="font-weight: bold; color: white;"><?php echo $st->nom_stand; ?></td>
                         <td><span class="badge"><?php echo $st->type_stand; ?></span></td>
                         <td><?php echo $st->ouvert ? "✓ Ouvert" : "✗ Fermé"; ?></td>
-                        <td><?php echo htmlspecialchars($st->proprietaire->nom_proprioStand . " ( " . $st->proprietaire->num_proprioStand . " )"); ?></td>
-                        <td>
+                        <td><?php echo $st->proprietaire->nom_proprioStand . " ( " . $st->proprietaire->num_proprioStand . " )"; ?></td>                        <td>
                             <a href="stand_edit.php?id=<?php echo $st->_id; ?>" class="btn-delete" style="color:white; border-color:#7B61FF;">Modifier</a>
                             <a href="dashboard.php?action=delete_stand&id=<?php echo $st->_id; ?>" class="btn-delete" onclick="return confirm('Supprimer ce stand ?');">X</a>
                         </td>

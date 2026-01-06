@@ -215,8 +215,8 @@ $bulk->insert([
     'nom_stand' => "Le Camion Fumeur",
     'type_stand' => "Food",
     'proprietaire' => [
-        'nom_contact' => "Paul Bernard",
-        'email' => "contact@camionfumeur.com"
+        'nom_proprioStand' => "Paul Bernard",
+        'num_proprioStand' => "0767564323"
     ],
     'ouvert' => true
 ]);
@@ -225,8 +225,8 @@ $bulk->insert([
     'nom_stand' => "Toka-Merch",
     'type_stand' => "Merch",
     'proprietaire' => [
-        'nom_contact' => "TokaFest Asso",
-        'email' => "merch@tokafest.com"
+        'nom_proprioStand' => "TokaFest Asso",
+        'num_proprioStand' => "0790564303"
     ],
     'ouvert' => true
 ]);
