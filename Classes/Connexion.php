@@ -1,19 +1,40 @@
 <?php
-class Connexion { //Singleton
+class Connexion { // Singleton
     private static $instance = null;
     
     private $manager;
     private $dbName = 'tokafest_db';
 
-    private function __construct() {
+    // Infos de connexion sécurisée
+    private $dbUser = 'adminBDD';
+    private $dbPass = 'admin123'; 
+    private $dbHost = 'localhost';
+    private $dbPort = '27017';
+private function __construct() {
         try {
-            $this->manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+            // 1. IMPORTANT : On encode le mot de passe pour gérer les caractères spéciaux (@, :, /, etc.)
+            $encodedPass = urlencode($this->dbPass);
+
+            // 2. On construit l'URI avec l'option authSource
+            // Syntaxe : mongodb://user:pass@host:port/database?authSource=database
+            $uri = "mongodb://{$this->dbUser}:{$encodedPass}@{$this->dbHost}:{$this->dbPort}/{$this->dbName}?authSource={$this->dbName}";
+            
+            // Debug (A supprimer une fois que ça marche !)
+            // echo "Tentative connexion : " . $uri; 
+
+            $this->manager = new MongoDB\Driver\Manager($uri);
+            
+            // Petit test rapide pour vérifier que la connexion est VRAIMENT établie
+            // (Le Manager ne se connecte réellement qu'à la première requête)
+            $command = new MongoDB\Driver\Command(['ping' => 1]);
+            $this->manager->executeCommand($this->dbName, $command);
+
         } catch (Exception $e) {
-            die("Erreur de connexion à la BDD : " . $e->getMessage());
+            // Affiche l'erreur exacte pour qu'on puisse comprendre si ça plante encore
+            die("Erreur critique BDD : " . $e->getMessage());
         }
     }
 
-    // Méthode statique pour récupérer l'instance unique
     public static function getInstance() {
         if (self::$instance == null) {
             self::$instance = new Connexion();
@@ -21,12 +42,10 @@ class Connexion { //Singleton
         return self::$instance;
     }
 
-    // Getter pour récupérer le Manager MongoDB
     public function getManager() {
         return $this->manager;
     }
 
-    // Getter pour récupérer le nom de la BDD
     public function getDbName() {
         return $this->dbName;
     }

@@ -1,5 +1,8 @@
 <?php
 session_start();
+// IMPORTANT : Assure-toi d'inclure ta classe Connexion ici
+require_once 'chemin/vers/ta/classe/Connexion.php'; 
+
 $message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -7,9 +10,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
     try {
-        $manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+        // 1. On récupère l'instance unique de connexion (qui contient déjà le mot de passe sécurisé)
+        $connexion = Connexion::getInstance();
+        $manager = $connexion->getManager();
+        $dbName = $connexion->getDbName();
+
+        // 2. Préparation de la requête
         $query = new MongoDB\Driver\Query(['username' => $username]);
-        $cursor = $manager->executeQuery('tokafest_db.admins', $query);
+        
+        // 3. Exécution (on utilise la variable $dbName pour être dynamique)
+        $cursor = $manager->executeQuery("$dbName.admins", $query);
         $user = current($cursor->toArray());
 
         if ($user && password_verify($password, $user->password)) {
@@ -21,12 +31,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $message = "Identifiants incorrects.";
         }
     } catch (Exception $e) {
-        $message = "Erreur de connexion.";
+        $message = "Erreur technique lors de la connexion.";
     }
-
-
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="fr">
