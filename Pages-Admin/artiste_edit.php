@@ -15,6 +15,7 @@ $id = null;
 $nom_artiste = ""; 
 $genre = ""; 
 $est_tete_affiche = false;
+
 $pageTitle = "Ajouter un Artiste";
 
 // --- Modification---

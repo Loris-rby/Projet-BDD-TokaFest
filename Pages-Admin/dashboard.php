@@ -8,6 +8,7 @@ require_once '../Classes/SceneManager.php';
 require_once '../Classes/ConcertManager.php';
 require_once '../Classes/BenevoleManager.php';
 require_once '../Classes/StandManager.php';
+require_once '../Classes/FestivalierManager.php';
 
 if (!isset($_SESSION['admin_logged_in'])) {
     header("Location: login.php");
@@ -19,6 +20,7 @@ $sceneManager    = new SceneManager();
 $concertManager  = new ConcertManager();
 $benevoleManager = new BenevoleManager();
 $standManager    = new StandManager();
+$festivalierManager = new FestivalierManager();
 
 $db = Connexion::getInstance()->getManager(); 
 
@@ -42,6 +44,9 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
             break;
         case 'delete_stand':    
             $deleted = $standManager->delete($id); 
+            break;
+        case 'delete_festivalier': 
+            $deleted = $festivalierManager->delete($id); 
             break;
     }
 
@@ -93,9 +98,7 @@ $benevoles = $benevoleManager->findAll(['nom' => 1]);
 $stands = $standManager->findAll(['nom_stand' => 1]);
 
 // Festivaliers
-$cmd = new MongoDB\Driver\Command(["count" => "festivaliers"]);
-$res = $db->executeCommand('tokafest_db', $cmd);
-$countFestivaliers = $res->toArray()[0]->n;
+$tousLesFestivaliers = $festivalierManager->findAll(['nom_complet' => 1]);
 
 
 // ---Statistiques ---
@@ -104,7 +107,7 @@ $stats = [
     'concerts'     => count($programmation),
     'scenes'       => count($scenes),
     'benevoles'    => count($benevoles),
-    'festivaliers' => $countFestivaliers, 
+    'festivaliers' => count($tousLesFestivaliers),
     'stands'       => count($stands)
 ];
 
@@ -228,7 +231,7 @@ function formatDuree($debut, $fin) {
                     ?>
                     <tr>
                         <td style="color: #ccc; font-family: monospace;">
-                            <span style="color: #7B61FF; font-weight:bold;"><?php echo $debut->format('H:i'); ?></span> 
+                            <span style="font-weight:bold;"><?php echo $debut->format('H:i'); ?></span> 
                             <small>(<?php echo $debut->format('d/m'); ?>)</small>
                         </td>
                         <td style="font-weight: bold; color: white;"><?php echo $artistesMap[$aId] ?? "Inconnu"; ?></td>
@@ -261,7 +264,7 @@ function formatDuree($debut, $fin) {
                 <tbody>
                     <?php foreach($scenes as $s): $sid = (string)$s->_id; ?>
                     <tr>
-                        <td style="color: #7B61FF; font-weight: bold;"><?php echo $s->nom_scene; ?></td>
+                        <td style="font-weight: bold;"><?php echo $s->nom_scene; ?></td>
                         <td style="font-size: 0.9em; color: #aaa;">
                             👥 <?php echo number_format($s->capacite_max, 0, ',', ' '); ?><br>
                             <?php echo $s->est_couverte ? "☂︎ Couverte" : "☀ Plein air"; ?>
@@ -339,6 +342,74 @@ function formatDuree($debut, $fin) {
                         <td>
                             <a href="benevole_edit.php?id=<?php echo $b->_id; ?>" class="btn-delete" style="color:white; border-color:#7B61FF;">Modifier</a>
                             <a href="dashboard.php?action=delete_benevole&id=<?php echo $b->_id; ?>" class="btn-delete" onclick="return confirm('Supprimer ce bénévole ?');">X</a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+
+            </table>
+        </div>
+
+<div class="admin-card">
+            <div class="section-header">
+                <h2>🎫 Festivaliers & Billetterie</h2>
+                <a href="festivalier_edit.php" class="btn-add">＋ Nouveau</a>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Identité</th>
+                        <th>Ville</th>
+                        <th width="40%">Détails des Billets (Type - Statut - Hash)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php 
+                    if (!isset($tousLesFestivaliers)) {
+                        $tousLesFestivaliers = $festivalierManager->findAll(['nom_complet' => 1]);
+                    }
+                    
+                    foreach($tousLesFestivaliers as $f): 
+                        $ville = isset($f->adresse->ville) ? $f->adresse->ville : '—';
+                        $billets = isset($f->billets_achetes) ? $f->billets_achetes : [];
+                    ?>
+                    <tr>
+                        <td>
+                            <strong style="color: white;"><?php echo $f->nom_complet; ?></strong><br>
+                            <small style="color: #aaa;"><?php echo $f->email; ?></small>
+                        </td>
+                        
+                        <td><?php echo $ville; ?></td>
+                        
+                        <td>
+                            <?php if(count($billets) > 0): ?>
+                                <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85em;">
+                                <?php foreach($billets as $b): 
+                                    $type = $b->type_billet ?? 'Inconnu';
+                                    $isValide = $b->qr_code_data->validation->est_valide ?? false;
+                                    $hash = $b->qr_code_data->hash_billet ?? 'N/A';
+                                    
+                                    // Couleur selon validité
+                                    $color = $isValide ? '#2ed573' : '#ff4757';
+                                    $statutTxt = $isValide ? 'VALIDE' : 'INVALIDE';
+                                ?>
+                                    <li style="margin-bottom: 5px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 4px;">
+                                        <span style="color: #7B61FF; font-weight:bold;"><?php echo $type; ?></span>
+                                        <span style="color: <?php echo $color; ?>; font-weight:bold; margin: 0 5px;">[<?php echo $statutTxt; ?>]</span>
+                                        <br>
+                                        <span style="font-family: monospace; color: #ccc;">Hash: <?php echo $hash; ?></span>
+                                    </li>
+                                <?php endforeach; ?>
+                                </ul>
+                            <?php else: ?>
+                                <span style="color:#555; font-style: italic;">Aucun billet</span>
+                            <?php endif; ?>
+                        </td>
+
+                        <td>
+                            <a href="festivalier_edit.php?id=<?php echo $f->_id; ?>" class="btn-delete" style="color:white; border-color:#7B61FF;">Consult.</a>
+                            <a href="dashboard.php?action=delete_festivalier&id=<?php echo $f->_id; ?>" class="btn-delete" onclick="return confirm('Supprimer ce festivalier ?');">X</a>
                         </td>
                     </tr>
                     <?php endforeach; ?>
