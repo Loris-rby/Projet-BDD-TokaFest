@@ -6,9 +6,12 @@ if (!isset($_SESSION['admin_logged_in'])) {
     exit;
 }
 
+
+
 $manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
 
-// --- Gestion des Suppressions ---
+// Supprimer les éléments 
+
 if (isset($_GET['action']) && isset($_GET['id'])) {
     try {
         $filter = ['_id' => new MongoDB\BSON\ObjectId($_GET['id'])];
@@ -31,7 +34,12 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
     } catch (Exception $e) {}
 }
 
-// --- Récupération des Données ---
+
+
+
+
+
+// Récupération de données 
 
 // Artistes
 $cursorArtistes = $manager->executeQuery('tokafest_db.artistes', new MongoDB\Driver\Query([], ['sort' => ['est_tete_affiche' => -1, 'nom_scene_artiste' => 1]]));
@@ -47,7 +55,7 @@ $scenes = $cursorScenes->toArray();
 $scenesMap = [];
 foreach($scenes as $s) $scenesMap[(string)$s->_id] = $s->nom_scene;
 
-// Concerts (Line-up)
+// Concerts 
 $cursorProg = $manager->executeQuery('tokafest_db.concerts', new MongoDB\Driver\Query([], ['sort' => ['heure_debut' => 1]]));
 $programmation = $cursorProg->toArray();
 
@@ -64,7 +72,7 @@ foreach ($programmation as $p) {
 $cursorBenevoles = $manager->executeQuery('tokafest_db.benevoles', new MongoDB\Driver\Query([], ['sort' => ['nom' => 1]]));
 $benevoles = $cursorBenevoles->toArray();
 
-// --- Statistiques ---
+// Stats
 $stats = [
     'artistes'  => count($artistes),
     'concerts'  => count($programmation),
@@ -72,10 +80,17 @@ $stats = [
     'benevoles' => count($benevoles)
 ];
 
+
+
+
+// Fonctions pour la duree
 function formatDuree($debut, $fin) {
     return floor(($fin->getTimestamp() - $debut->getTimestamp()) / 60) . ' min';
 }
 ?>
+
+
+<!-- Affichage de la page -->
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -149,7 +164,7 @@ function formatDuree($debut, $fin) {
                         <td><span class="badge"><?php echo $a->genre_musical; ?></span></td>
                         <td>
                             <?php if(isset($a->est_tete_affiche) && $a->est_tete_affiche): ?>
-                                <span class="badge badge-headliner">⭐ Headliner</span>
+                                <span class="badge badge-headliner">⭐ Tête d'affiche</span>
                             <?php else: ?>
                                 <span style="color:#666; font-size:0.9em;">Standard</span>
                             <?php endif; ?>
@@ -224,7 +239,7 @@ function formatDuree($debut, $fin) {
                         <td style="color: #7B61FF; font-weight: bold;"><?php echo $s->nom_scene; ?></td>
                         <td style="font-size: 0.9em; color: #aaa;">
                             👥 <?php echo number_format($s->capacite_max, 0, ',', ' '); ?><br>
-                            <?php echo $s->est_couverte ? "⛺ Couverte" : "☀ Plein air"; ?>
+                            <?php echo $s->est_couverte ? "Couverte" : "Plein air"; ?>
                         </td>
                         <td>
                             <?php if(isset($concertsByScene[$sid])): ?>

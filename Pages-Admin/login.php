@@ -42,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     <div class="login-wrapper">
         <div class="login-box">
-            <h2>Admin Access</h2>
+            <h2>Admin</h2>
             <form method="post">
                 <div class="form-group">
                     <label class="form-label">Identifiant</label>
