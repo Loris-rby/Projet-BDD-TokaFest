@@ -107,15 +107,7 @@ $stats = [
     'stands'       => count($stands)
 ];
 
-<<<<<<< HEAD
-
-
-
-
-// Fonctions pour la duree
-=======
 // Durée du concert
->>>>>>> 0ab354d632249d6a91272536a7d35d8afa160b47
 function formatDuree($debut, $fin) {
     $seconds = $fin->getTimestamp() - $debut->getTimestamp();
     
