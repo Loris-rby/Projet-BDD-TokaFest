@@ -31,14 +31,12 @@ $heure_debut = "";
 $heure_fin = "";
 $pageTitle = "Programmer un Concert";
 
-// --- MODE MODIFICATION (Récupération des données) ---
+// Mode Modification
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
-    // Appel via le Manager
     $doc = $concertManager->findById($id);
     
     if ($doc) {
-        // On convertit les ObjectId en string pour les pré-sélectionner dans le HTML
         $artiste_id = (string)$doc->artiste_id;
         $scene_id   = (string)$doc->scene_id;
         
@@ -50,21 +48,18 @@ if (isset($_GET['id'])) {
     }
 }
 
-// --- TRAITEMENT DU FORMULAIRE (POST) ---
+// Formulaire Ajout/Modif Concert
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
-    // Conversion Date HTML -> MongoDB UTCDateTime (Millisecondes)
+    // Conversion Date HTML
     $start = new MongoDB\BSON\UTCDateTime(strtotime($_POST['heure_debut']) * 1000);
     $end   = new MongoDB\BSON\UTCDateTime(strtotime($_POST['heure_fin']) * 1000);
 
-    // Préparation des données
     $data = [
-        // Important : On cast en ObjectId pour que la jointure fonctionne
         'artiste_id'  => new MongoDB\BSON\ObjectId($_POST['artiste_id']),
         'scene_id'    => new MongoDB\BSON\ObjectId($_POST['scene_id']),
         'heure_debut' => $start,
-        'heure_fin'   => $end,
-        'annule'      => false
+        'heure_fin'   => $end
     ];
 
     if ($id) {

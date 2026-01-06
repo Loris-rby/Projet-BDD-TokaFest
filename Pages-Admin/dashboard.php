@@ -111,9 +111,18 @@ $stats = [
     'stands'       => count($stands)
 ];
 
-
+// Durée du concert
 function formatDuree($debut, $fin) {
-    return floor(($fin->getTimestamp() - $debut->getTimestamp()) / 60) . ' min';
+    $seconds = $fin->getTimestamp() - $debut->getTimestamp();
+    
+    $heures = floor($seconds / 3600);
+    $minutes = floor(($seconds % 3600) / 60);
+
+    if ($heures > 0) {
+        return $heures . 'h' . ($minutes > 0 ? sprintf("%02d", $minutes) : '');
+    } else {
+        return $minutes . ' min';
+    }
 }
 ?>
 
@@ -231,7 +240,7 @@ function formatDuree($debut, $fin) {
                     ?>
                     <tr>
                         <td style="color: #ccc; font-family: monospace;">
-                            <span style="font-weight:bold;"><?php echo $debut->format('H:i'); ?></span> 
+                            <span style="font-weight:bold;"><?php echo $debut->format('H:i') . "-" . $fin->format('H:i'); ?></span> 
                             <small>(<?php echo $debut->format('d/m'); ?>)</small>
                         </td>
                         <td style="font-weight: bold; color: white;"><?php echo $artistesMap[$aId] ?? "Inconnu"; ?></td>
