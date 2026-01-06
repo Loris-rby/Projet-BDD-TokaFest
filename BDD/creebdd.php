@@ -193,7 +193,6 @@ $bulk->insert([
     'scene_id' => $sceneId1,     // Référence
     'heure_debut' => getMongoDate("2024-07-20T22:00:00Z"),
     'heure_fin' => getMongoDate("2024-07-20T23:30:00Z"),
-    'annule' => false
 ]);
 
 $bulk->insert([
@@ -201,7 +200,6 @@ $bulk->insert([
     'scene_id' => $sceneId2,     // Référence
     'heure_debut' => getMongoDate("2024-07-20T19:00:00Z"),
     'heure_fin' => getMongoDate("2024-07-20T20:00:00Z"),
-    'annule' => false
 ]);
 
 $manager->executeBulkWrite("$dbName.concerts", $bulk);
