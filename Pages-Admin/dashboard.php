@@ -8,18 +8,27 @@ require_once '../Classes/SceneManager.php';
 require_once '../Classes/ConcertManager.php';
 require_once '../Classes/BenevoleManager.php';
 require_once '../Classes/StandManager.php';
-require_once '../Classes/FestivalierManager.php';
+// On a retiré FestivalierManager !
 
 if (!isset($_SESSION['admin_logged_in'])) {
     header("Location: login.php");
     exit;
 }
 
+// 1. Connexion Sécurisée (CRUCIAL)
+$connexion = Connexion::getInstance();
+$manager = $connexion->getManager();
+$dbName = $connexion->getDbName();
+
+// 2. Instanciation des Managers restants
+$artisteManager    = new ArtisteManager();
+$sceneManager      = new SceneManager();
+$concertManager    = new ConcertManager();
+$benevoleManager   = new BenevoleManager();
+$standManager      = new StandManager();
 
 
-$manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
-
-// --- Gestion des Suppressions ---
+// --- 3. Gestion des Actions (Suppressions) ---
 if (isset($_GET['action']) && isset($_GET['id'])) {
     $id = $_GET['id'];
     $deleted = false;
@@ -48,53 +57,47 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
     }
 }
 
-// --- Récupération des Données ---
+// --- 4. Récupération des Données ---
 
-// Artistes (Triés par Tête d'affiche, puis nom)
+// Artistes
 $artistes = $artisteManager->findAll(['est_tete_affiche' => -1, 'nom_scene_artiste' => 1]);
-
-// Map pour les noms (Logique de vue conservée)
 $artistesMap = [];
 foreach ($artistes as $a) $artistesMap[(string)$a->_id] = $a->nom_scene_artiste;
 
 // Scènes
 $scenes = $sceneManager->findAll(['nom_scene' => 1]);
-
 $scenesMap = [];
 foreach($scenes as $s) $scenesMap[(string)$s->_id] = $s->nom_scene;
 
-// Concerts (Line-up)
-$cursorProg = $manager->executeQuery('tokafest_db.concerts', new MongoDB\Driver\Query([], ['sort' => ['heure_debut' => 1]]));
+// Concerts (Direct via Manager pour le tri)
+$cursorProg = $manager->executeQuery("$dbName.concerts", new MongoDB\Driver\Query([], ['sort' => ['heure_debut' => 1]]));
 $programmation = $cursorProg->toArray();
 
-// Préparation de l'affichage des concerts par scène
+// Mapping Concerts -> Scènes
 $concertsByScene = [];
 foreach ($programmation as $p) {
     $sid = (string)$p->scene_id;
     $aid = (string)$p->artiste_id;
     $nomArtiste = $artistesMap[$aid] ?? "Inconnu";
     
-    // Gestion sécurisée de la date
     $heure = "??:??";
     if (isset($p->heure_debut)) {
-        // Conversion BSON Date -> PHP DateTime
         $heure = $p->heure_debut->toDateTime()->format('H:i');
     }
-    
-    $concertsByScene[$sid][] = "<span style='color:#ccc'>$heure</span> <strong>$nomArtiste</strong>";
+    $concertsByScene[$sid][] = "<strong>$nomArtiste</strong>";
 }
 
-// Bénévoles
+// Bénévoles & Stands
 $benevoles = $benevoleManager->findAll(['nom' => 1]);
-
-// Stands
 $stands = $standManager->findAll(['nom_stand' => 1]);
 
-// Festivaliers
-$tousLesFestivaliers = $festivalierManager->findAll(['nom_complet' => 1]);
+// FESTIVALIERS (RECUPÉRATION DIRECTE SANS MANAGER)
+$queryFest = new MongoDB\Driver\Query([], ['sort' => ['nom_complet' => 1]]);
+$cursorFest = $manager->executeQuery("$dbName.festivaliers", $queryFest);
+$tousLesFestivaliers = $cursorFest->toArray();
 
 
-// --- Statistiques ---
+// --- 5. Statistiques ---
 $stats = [
     'artistes'     => count($artistes),
     'concerts'     => count($programmation),
@@ -104,23 +107,14 @@ $stats = [
     'stands'       => count($stands)
 ];
 
-// Durée du concert
+// Helper Durée
 function formatDuree($debut, $fin) {
     $seconds = $fin->getTimestamp() - $debut->getTimestamp();
-    
     $heures = floor($seconds / 3600);
     $minutes = floor(($seconds % 3600) / 60);
-
-    if ($heures > 0) {
-        return $heures . 'h' . ($minutes > 0 ? sprintf("%02d", $minutes) : '');
-    } else {
-        return $minutes . ' min';
-    }
+    return ($heures > 0) ? $heures . 'h' . sprintf("%02d", $minutes) : $minutes . ' min';
 }
 ?>
-
-
-<!-- Affichage de la page -->
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -130,7 +124,6 @@ function formatDuree($debut, $fin) {
     <link rel="stylesheet" href="../css/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* Ton CSS inline original conservé */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px; }
         .stat-card { background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; border-left: 4px solid #7B61FF; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .stat-number { font-size: 2.5em; font-weight: bold; color: white; margin: 0; }
@@ -171,12 +164,12 @@ function formatDuree($debut, $fin) {
                 <p class="stat-label">Scènes</p>
             </div>
             <div class="stat-card" style="border-left-color: #2ed573;">
-                <p class="stat-number"><?php echo $stats['benevoles']; ?></p>
-                <p class="stat-label">Bénévoles</p>
+                <p class="stat-number"><?php echo $stats['festivaliers']; ?></p>
+                <p class="stat-label">Festivaliers</p>
             </div>
         </div>
 
-         <div class="admin-card">
+        <div class="admin-card">
             <div class="section-header">
                 <h2>📅 Line-up & Horaires</h2>
                 <a href="concert_edit.php" class="btn-add" style="background-color: #ff4757;">＋ Programmer</a>
@@ -216,7 +209,6 @@ function formatDuree($debut, $fin) {
             </table>
         </div>
 
-
         <div class="admin-card">
             <div class="section-header">
                 <h2>🎸 Artistes & Groupes</h2>
@@ -233,7 +225,6 @@ function formatDuree($debut, $fin) {
                 </thead>
                 <tbody>
                     <?php foreach($artistes as $a): 
-                        // Sécurisation des données de base
                         $desc = $a->description ?? '';
                         $membres = $a->membres ?? [];
                         $discographie = $a->discographie ?? [];
@@ -292,24 +283,16 @@ function formatDuree($debut, $fin) {
                                             ?>
                                                 <li style="font-size: 0.9em; margin-bottom: 3px; color: #ddd;">
                                                     <?php echo $titreTrack; ?> <span style="color:#666; font-size:0.8em;">(<?php echo $duree; ?>)</span>
-
                                                     <?php if(!empty($feats)): ?>
-                                                        <div style="font-size: 0.85em; color: #7B61FF; margin-left: 15px;">
-                                                            Feat: 
-                                                            <?php 
-                                                            $featNames = [];
-                                                            foreach($feats as $f) {
-                                                                $featNames[] = $f->nomFeat ?? '';
-                                                            }
-                                                            echo implode(", ", $featNames);
-                                                            ?>
-                                                        </div>
+                                                        <span style="font-size: 0.85em; color: #7B61FF;">
+                                                            Feat: <?php echo implode(", ", array_column((array)$feats, 'nomFeat')); ?>
+                                                        </span>
                                                     <?php endif; ?>
                                                 </li>
                                             <?php endforeach; ?>
                                             </ul>
                                         <?php else: ?>
-                                            <div style="font-size: 0.8em; color: #666; padding-left: 10px;">Aucune piste listée.</div>
+                                            <div style="font-size: 0.8em; color: #666; padding-left: 10px;">Aucune piste.</div>
                                         <?php endif; ?>
                                     </div>
                                 <?php endforeach; ?>
@@ -321,46 +304,6 @@ function formatDuree($debut, $fin) {
                         <td style="vertical-align: top;">
                             <a href="artiste_edit.php?id=<?php echo $a->_id; ?>" class="btn-delete" style="color:white; border-color:#F1C40F; margin-bottom:5px; display:inline-block;">Modifier</a>
                             <a href="dashboard.php?action=delete_artiste&id=<?php echo $a->_id; ?>" class="btn-delete" onclick="return confirm('Supprimer cet artiste ?');">X</a>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="admin-card">
-            <div class="section-header">
-                <h2>📅 Line-up & Horaires</h2>
-                <a href="concert_edit.php" class="btn-add" style="background-color: #ff4757;">＋ Programmer</a>
-            </div>
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Horaire</th>
-                        <th>Artiste</th>
-                        <th>Scène</th>
-                        <th>Durée</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach($programmation as $prog): 
-                        $aId = (string)$prog->artiste_id;
-                        $sId = (string)$prog->scene_id;
-                        $debut = $prog->heure_debut->toDateTime();
-                        $fin = $prog->heure_fin->toDateTime();
-                    ?>
-                    <tr>
-                        <td style="color: #ccc; font-family: monospace;">
-                            <span style="font-weight:bold;"><?php echo $debut->format('H:i') . "-" . $fin->format('H:i'); ?></span> 
-                            <small>(<?php echo $debut->format('d/m'); ?>)</small>
-                        </td>
-                        <td style="font-weight: bold; color: white;"><?php echo $artistesMap[$aId] ?? "Inconnu"; ?></td>
-                        <td><span class="badge badge-purple"><?php echo $scenesMap[$sId] ?? "Inconnue"; ?></span></td>
-                        <td><?php echo formatDuree($debut, $fin); ?></td>
-                        <td>
-                            <a href="concert_edit.php?id=<?php echo $prog->_id; ?>" class="btn-delete" style="color:white; border-color:#7B61FF;">Modifier</a>
-                            <a href="dashboard.php?action=delete_concert&id=<?php echo $prog->_id; ?>" class="btn-delete" onclick="return confirm('Supprimer ce créneau ?');">X</a>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -387,8 +330,8 @@ function formatDuree($debut, $fin) {
                     <tr>
                         <td style="font-weight: bold;"><?php echo $s->nom_scene; ?></td>
                         <td style="font-size: 0.9em; color: #aaa;">
-                            👥 <?php echo number_format($s->capacite_max, 0, ',', ' '); ?><br>
-                            <?php echo $s->est_couverte ? "⛺ Couverte" : "☀ Plein air"; ?>
+                            <?php echo number_format($s->capacite_max, 0, ',', ' '); ?><br>
+                            <?php echo $s->est_couverte ? "Couverte" : "☀ Plein air"; ?>
                         </td>
                         <td>
                             <?php if(isset($concertsByScene[$sid])): ?>
@@ -471,7 +414,7 @@ function formatDuree($debut, $fin) {
             </table>
         </div>
 
-<div class="admin-card">
+        <div class="admin-card">
             <div class="section-header">
                 <h2>🎫 Festivaliers</h2>
             </div>
@@ -484,17 +427,8 @@ function formatDuree($debut, $fin) {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php 
-                    // Chargement des données si nécessaire
-                    if (!isset($tousLesFestivaliers)) {
-                        $tousLesFestivaliers = $festivalierManager->findAll(['nom_complet' => 1]);
-                    }
-                    
-                    foreach($tousLesFestivaliers as $f): 
-                        // Formatage Date de Naissance
+                    <?php foreach($tousLesFestivaliers as $f): 
                         $naissance = isset($f->date_naissance) ? $f->date_naissance->toDateTime()->format('d/m/Y') : '';
-
-                        // Récupération des billets
                         $billets = isset($f->billets_achetes) ? $f->billets_achetes : [];
                     ?>
                     <tr>
@@ -518,47 +452,36 @@ function formatDuree($debut, $fin) {
                             <?php if(count($billets) > 0): ?>
                                 <ul style="list-style: none; padding: 0; margin: 0;">
                                 <?php foreach($billets as $b): 
-                                    // Extraction sécurisée des données
                                     $type = $b->type_billet ?? 'Inconnu';
                                     $prix = isset($b->prix_paye) ? $b->prix_paye . '€' : '0€';
-                                    
-                                    // Dates
                                     $dateAchat = isset($b->date_achat) ? $b->date_achat->toDateTime()->format('d/m/Y H:i') : '-';
                                     
-                                    // Données QR & Validation
                                     $qrData = $b->qr_code_data ?? null;
                                     $hash = $qrData->hash_billet ?? 'N/A';
                                     $urlQr = $qrData->url_image_qr ?? '#';
                                     
                                     $isValide = $qrData->validation->est_valide ?? false;
                                     $dateScan = isset($qrData->validation->date_scan) ? $qrData->validation->date_scan->toDateTime()->format('d/m à H:i') : null;
-
-                                    // Couleurs
                                     $colorStatus = $isValide ? '#2ed573' : '#ff4757';
                                     $txtStatus = $isValide ? 'VALIDE' : 'DÉJÀ SCANNÉ';
                                 ?>
                                     <li style="margin-bottom: 10px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px; font-size: 0.9em;">
-                                        
                                         <div style="font-weight: bold; color: #fff; margin-bottom: 2px;">
                                             <?php echo $type; ?> <span style="color: #F1C40F;">(<?php echo $prix; ?>)</span>
                                         </div>
-
                                         <div style="color: #aaa; margin-bottom: 4px; font-size: 0.85em;">
                                             Acheté le : <?php echo $dateAchat; ?>
                                         </div>
-
                                         <div style="font-family: monospace; color: #888; margin-bottom: 4px; word-break: break-all;">
                                             #<?php echo substr($hash, 0, 12); ?>... <br>
                                             <a href="<?php echo $urlQr; ?>" target="_blank" style="color: #7B61FF;">Voir le QR</a>
                                         </div>
-
                                         <div style="border-top: 1px solid #444; padding-top: 4px; margin-top: 4px;">
                                             Statut : <span style="color: <?php echo $colorStatus; ?>; font-weight: bold;"><?php echo $txtStatus; ?></span>
                                             <?php if(!$isValide && $dateScan): ?>
                                                 <br><span style="color: #eccc68;">Scanné le : <?php echo $dateScan; ?></span>
                                             <?php endif; ?>
                                         </div>
-
                                     </li>
                                 <?php endforeach; ?>
                                 </ul>

@@ -1,7 +1,7 @@
 <?php
 session_start();
 // IMPORTANT : Assure-toi d'inclure ta classe Connexion ici
-require_once 'chemin/vers/ta/classe/Connexion.php'; 
+require_once '../Classes/Connexion.php'; 
 
 $message = "";
 
