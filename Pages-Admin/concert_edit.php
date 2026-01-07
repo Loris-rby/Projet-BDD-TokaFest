@@ -1,26 +1,21 @@
 <?php
 session_start();
 
-// 1. Chargement des classes
 require_once '../Classes/Connexion.php';
 require_once '../Classes/Manager.php';
 require_once '../Classes/ConcertManager.php';
 require_once '../Classes/ArtisteManager.php';
 require_once '../Classes/SceneManager.php';
 
-// Sécurité
 if (!isset($_SESSION['admin_logged_in'])) { 
     header("Location: login.php"); 
     exit; 
 }
 
-// 2. Instanciation des Managers
 $concertManager = new ConcertManager();
 $artisteManager = new ArtisteManager();
 $sceneManager   = new SceneManager();
 
-// 3. Récupération des listes pour les menus déroulants
-// On trie pour que l'affichage soit alphabétique
 $artistes = $artisteManager->findAll(['nom_scene_artiste' => 1]);
 $scenes   = $sceneManager->findAll(['nom_scene' => 1]);
 
@@ -40,7 +35,6 @@ if (isset($_GET['id'])) {
         $artiste_id = (string)$doc->artiste_id;
         $scene_id   = (string)$doc->scene_id;
         
-        // Formatage Date MongoDB -> HTML input datetime-local
         $heure_debut = $doc->heure_debut->toDateTime()->format('Y-m-d\TH:i');
         $heure_fin   = $doc->heure_fin->toDateTime()->format('Y-m-d\TH:i');
         
