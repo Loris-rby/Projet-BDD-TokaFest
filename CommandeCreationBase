@@ -16,7 +16,7 @@ db.stands.drop();
 db.admins.insertOne({
     "_id": ObjectId("695e1ec9af5f40f9980d8265"),
     "username": "admin",
-    // Hash du mot de passe
+    // Hash du mot de passe ("admin")
     "password": "$2y$10$/6XH7OyjmoS1YdJ6m2iO.OV21lS3nmdgxVHmnrJ/zndU0iDJfBm0K"
 });
 
