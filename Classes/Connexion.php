@@ -12,11 +12,9 @@ class Connexion { // Singleton
     private $dbPort = '27017';
 private function __construct() {
         try {
-            // 1. IMPORTANT : On encode le mot de passe pour gérer les caractères spéciaux (@, :, /, etc.)
+            // Encode le mdp
             $encodedPass = urlencode($this->dbPass);
 
-            // 2. On construit l'URI avec l'option authSource
-            // Syntaxe : mongodb://user:pass@host:port/database?authSource=database
             $uri = "mongodb://{$this->dbUser}:{$encodedPass}@{$this->dbHost}:{$this->dbPort}/{$this->dbName}?authSource={$this->dbName}";
             
             // Debug (A supprimer une fois que ça marche !)

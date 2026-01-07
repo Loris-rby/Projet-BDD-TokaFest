@@ -14,14 +14,14 @@ $nom_artiste = "";
 $genre = ""; 
 $description = ""; 
 $est_tete_affiche = false;
-$membresList = []; // On stocke les membres sous forme de tableau ici
+$membresList = []; 
 $discographie = []; 
 
 $pageTitle = "Ajouter un Artiste";
 $description = "";
 $equipeTechnique = [];
 
-// --- 1. MODE MODIFICATION ---
+// Mode Modification
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
     $doc = $artisteManager->findById($id);
@@ -32,7 +32,7 @@ if (isset($_GET['id'])) {
         $description = $doc->description ?? "";
         $est_tete_affiche = $doc->est_tete_affiche ?? false;
 
-        // Récupération des membres (Tableau simple)
+        // Equipe Technique
         if (isset($doc->membres) && is_array($doc->membres)) {
             foreach($doc->membres as $m) {
                 // On gère le cas où c'est un string ou un objet
@@ -41,7 +41,7 @@ if (isset($_GET['id'])) {
             }
         }
 
-        // Récupération Discographie
+        // Discographie
         if (isset($doc->discographie)) {
             $discographie = $doc->discographie;
         }
@@ -50,7 +50,7 @@ if (isset($_GET['id'])) {
     }
 }
 
-// --- 2. TRAITEMENT DU FORMULAIRE ---
+// Formulaire Ajout/Modif Artiste
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Récupération propre du tableau HTML 'membres[]'
@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'genre_musical'     => $_POST['genre_musical'],
         'description'       => $_POST['description'],
         'est_tete_affiche'  => isset($_POST['est_tete_affiche']),
-        'membres'           => $membresArray // On envoie le tableau direct
+        'membres'           => $membresArray 
     ];
 
     if ($id) {
