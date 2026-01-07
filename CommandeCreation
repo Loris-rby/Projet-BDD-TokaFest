@@ -1,0 +1,189 @@
+use tokafest_db;
+db.dropDatabase(); // Base vide au départ
+
+//CREATION ADMIN
+db.admins.insertOne({
+    "username": "admin",
+    // Hash correspondant à "admin" (généré par PHP password_hash)
+    "password": "$2y$10$/6XH7OyjmoS1YdJ6m2iO.OV21lS3nmdgxVHmnrJ/zndU0iDJfBm0K"
+});
+
+
+// CREATION SCENES
+var idSceneMain = ObjectId();
+var idSceneCtrl = ObjectId();
+
+db.scenes.insertMany([
+    {
+        "_id": idSceneMain,
+        "nom_scene": "TokaMain",
+        "capacite_max": 1500,
+        "est_couverte": false
+    },
+    {
+        "_id": idSceneCtrl,
+        "nom_scene": "TokaCtrlB",
+        "capacite_max": 1800,
+        "est_couverte": false
+    }
+]);
+
+// CREATION ARTISTES
+var idDaftPunk = ObjectId();
+var idGuetta = ObjectId();
+var idLuvbox = ObjectId();
+
+db.artistes.insertMany([
+    {
+        "_id": idDaftPunk,
+        "nom_scene_artiste": "Daft Punk",
+        "genre_musical": "French Touch",
+        "description": "Robots légendaires.",
+        "est_tete_affiche": true,
+        "membres": ["Thomas Bangalter", "Guy-Manuel de Homem-Christo"],
+        "discographie": [
+            {
+                "titreAlbum": "Discovery",
+                "anneeSortie": 2001,
+                "tracks": [
+                    { "titre": "One More Time", "dureeSecondes": 320, "featuring": [] },
+                    { "titre": "Harder, Better...", "dureeSecondes": 224, "featuring": [] }
+                ]
+            }
+        ]
+    },
+    {
+        "_id": idGuetta,
+        "nom_scene_artiste": "David Guetta",
+        "genre_musical": "EDM",
+        "description": "Le DJ français n°1.",
+        "est_tete_affiche": true,
+        "membres": ["David Guetta"],
+        "discographie": [
+            {
+                "titreAlbum": "Nothing but the Beat",
+                "anneeSortie": 2011,
+                "tracks": [
+                    { "titre": "Titanium", "dureeSecondes": 245, "featuring": [{ "nomFeat": "Sia" }] }
+                ]
+            }
+        ]
+    },
+    {
+        "_id": idLuvbox,
+        "nom_scene_artiste": "Luvbox",
+        "genre_musical": "Schranz",
+        "description": "Hard techno sans concession.",
+        "est_tete_affiche": false,
+        "membres": ["Arthur Kerviel"],
+        "discographie": []
+    }
+]);
+
+//CREATION CONCERTS
+db.concerts.insertMany([
+    {
+        "heure_debut": ISODate("2026-06-20T22:00:00Z"),
+        "heure_fin": ISODate("2026-06-20T23:30:00Z"),
+        "artiste_id": idDaftPunk, 
+        "scene_id": idSceneMain  
+    },
+    {
+        "heure_debut": ISODate("2026-06-20T20:00:00Z"),
+        "heure_fin": ISODate("2026-06-20T21:30:00Z"),
+        "artiste_id": idGuetta,  
+        "scene_id": idSceneMain   
+    },
+    {
+        "heure_debut": ISODate("2026-06-20T23:00:00Z"),
+        "heure_fin": ISODate("2026-06-21T00:30:00Z"),
+        "artiste_id": idLuvbox,   
+        "scene_id": idSceneCtrl   
+    }
+]);
+
+//CREATION FESTIVALIERS
+db.festivaliers.insertMany([
+    {
+        "nom_complet": "Loris Rouby",
+        "email": "loris.rouby@test.com",
+        "date_naissance": ISODate("2006-06-09T00:00:00Z"),
+        "adresse": {
+            "rue": "10 Rue du Code",
+            "ville": "Lyon",
+            "code_postal": "69000"
+        },
+        "billets_achetes": [
+            {
+                "type_billet": "Pass VIP",
+                "date_achat": new Date(),
+                "prix_paye": 250,
+                "qr_code_data": {
+                    "hash_billet": "e41de4a16e6bc0f8",
+                    "validation": {
+                        "est_valide": true,
+                        "date_scan": null
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "nom_complet": "Charlotte Encarnacao",
+        "email": "charlotte.e@test.com",
+        "date_naissance": ISODate("2006-06-13T00:00:00Z"),
+        "adresse": { "rue": "Av. Dance", "ville": "Paris", "code_postal": "75001" },
+        "billets_achetes": [
+            {
+                "type_billet": "Pass 3 Jours",
+                "date_achat": new Date(),
+                "prix_paye": 120,
+                "qr_code_data": {
+                    "hash_billet": "a961cb1d1170",
+                    "validation": {
+                        "est_valide": false, // Déja scanné
+                        "date_scan": new Date()
+                    }
+                }
+            }
+        ]
+    }
+]);
+
+//CREATION BENEVOLES
+db.benevoles.insertMany([
+    {
+        "nom": "Dupont",
+        "prenom": "Jean",
+        "equipe": "Bar",
+        "scene_assignee_id": idSceneMain
+    },
+    {
+        "nom": "Curie",
+        "prenom": "Pierre",
+        "equipe": "Nettoyage",
+        "scene_assignee_id": null 
+    }
+]);
+
+//CREATION STANDS
+db.stands.insertMany([
+    {
+        "nom_stand": "Burgouzz",
+        "type_stand": "RESTAURATION",
+        "ouvert": true,
+        "proprietaire": {
+            "nom_proprioStand": "Valouzz",
+            "num_proprioStand": "06 01 02 03 04"
+        }
+    },
+    {
+        "nom_stand": "AtelierChAcOu",
+        "type_stand": "MERCH",
+        "ouvert": true,
+        "proprietaire": {
+            "nom_proprioStand": "Lucie Jean",
+            "num_proprioStand": "07 08 09 10 11"
+        }
+    }
+]);

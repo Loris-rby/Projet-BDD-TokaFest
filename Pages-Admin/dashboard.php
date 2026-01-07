@@ -436,7 +436,6 @@ function formatDuree($debut, $fin) {
                                     
                                     $qrData = $b->qr_code_data ?? null;
                                     $hash = $qrData->hash_billet ?? 'N/A';
-                                    $urlQr = $qrData->url_image_qr ?? '#';
                                     
                                     $isValide = $qrData->validation->est_valide ?? false;
                                     $dateScan = isset($qrData->validation->date_scan) ? $qrData->validation->date_scan->toDateTime()->format('d/m à H:i') : null;
@@ -451,8 +450,7 @@ function formatDuree($debut, $fin) {
                                             Acheté le : <?php echo $dateAchat; ?>
                                         </div>
                                         <div style="font-family: monospace; color: #888; margin-bottom: 4px; word-break: break-all;">
-                                            #<?php echo substr($hash, 0, 12); ?>... <br>
-                                            <a href="<?php echo $urlQr; ?>" target="_blank" style="color: #7B61FF;">Voir le QR</a>
+                                            #<?php echo $hash; ?><br>
                                         </div>
                                         <div style="border-top: 1px solid #444; padding-top: 4px; margin-top: 4px;">
                                             Statut : <span style="color: <?php echo $colorStatus; ?>; font-weight: bold;"><?php echo $txtStatus; ?></span>
