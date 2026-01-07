@@ -45,9 +45,6 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
         case 'delete_stand':    
             $deleted = $standManager->delete($id); 
             break;
-        case 'delete_festivalier': 
-            $deleted = $festivalierManager->delete($id); 
-            break;
     }
 
     if ($deleted) {
@@ -180,6 +177,47 @@ function formatDuree($debut, $fin) {
             </div>
         </div>
 
+         <div class="admin-card">
+            <div class="section-header">
+                <h2>📅 Line-up & Horaires</h2>
+                <a href="concert_edit.php" class="btn-add" style="background-color: #ff4757;">＋ Programmer</a>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Horaire</th>
+                        <th>Artiste</th>
+                        <th>Scène</th>
+                        <th>Durée</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach($programmation as $prog): 
+                        $aId = (string)$prog->artiste_id;
+                        $sId = (string)$prog->scene_id;
+                        $debut = $prog->heure_debut->toDateTime();
+                        $fin = $prog->heure_fin->toDateTime();
+                    ?>
+                    <tr>
+                        <td style="color: #ccc; font-family: monospace;">
+                            <span style="font-weight:bold;"><?php echo $debut->format('H:i') . "-" . $fin->format('H:i'); ?></span> 
+                            <small>(<?php echo $debut->format('d/m'); ?>)</small>
+                        </td>
+                        <td style="font-weight: bold; color: white;"><?php echo $artistesMap[$aId] ?? "Inconnu"; ?></td>
+                        <td><span class="badge badge-purple"><?php echo $scenesMap[$sId] ?? "Inconnue"; ?></span></td>
+                        <td><?php echo formatDuree($debut, $fin); ?></td>
+                        <td>
+                            <a href="concert_edit.php?id=<?php echo $prog->_id; ?>" class="btn-delete" style="color:white; border-color:#7B61FF;">Modifier</a>
+                            <a href="dashboard.php?action=delete_concert&id=<?php echo $prog->_id; ?>" class="btn-delete" onclick="return confirm('Supprimer ce créneau ?');">X</a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+
+
         <div class="admin-card">
             <div class="section-header">
                 <h2>🎸 Artistes & Groupes</h2>
@@ -188,26 +226,101 @@ function formatDuree($debut, $fin) {
             <table class="admin-table">
                 <thead>
                     <tr>
-                        <th>Nom</th>
-                        <th>Genre</th>
-                        <th>Statut</th>
-                        <th>Actions</th>
+                        <th width="20%">Identité & Description</th>
+                        <th width="15%">Équipe Technique</th>
+                        <th>Discographie</th>
+                        <th width="10%">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach($artistes as $a): ?>
+                    <?php foreach($artistes as $a): 
+                        // Sécurisation des données de base
+                        $desc = $a->description ?? '';
+                        $membres = $a->membres ?? [];
+                        $discographie = $a->discographie ?? [];
+                    ?>
                     <tr>
-                        <td style="font-weight: bold; color: white;"><?php echo $a->nom_scene_artiste; ?></td>
-                        <td><span class="badge"><?php echo $a->genre_musical; ?></span></td>
-                        <td>
-                            <?php if(isset($a->est_tete_affiche) && $a->est_tete_affiche): ?>
-                                <span class="badge badge-headliner">⭐ Headliner</span>
-                            <?php else: ?>
-                                <span style="color:#666; font-size:0.9em;">Standard</span>
+                        <td style="vertical-align: top;">
+                            <strong style="font-size: 1.2em; color: white;"><?php echo $a->nom_scene_artiste; ?></strong>
+                            <br>
+                            <span class="badge" style="margin-top:5px; display:inline-block;"><?php echo $a->genre_musical; ?></span>
+                            
+                            <div style="margin-top: 8px;">
+                                <?php if(isset($a->est_tete_affiche) && $a->est_tete_affiche): ?>
+                                    <span class="badge badge-headliner">⭐ Headliner</span>
+                                <?php else: ?>
+                                    <span style="color:#666; font-size:0.8em;">Standard</span>
+                                <?php endif; ?>
+                            </div>
+
+                            <?php if(!empty($desc)): ?>
+                                <div style="margin-top: 10px; font-size: 0.85em; color: #aaa; font-style: italic;">
+                                    "<?php echo substr($desc, 0, 100) . (strlen($desc)>100 ? '...' : ''); ?>"
+                                </div>
                             <?php endif; ?>
                         </td>
-                        <td>
-                            <a href="artiste_edit.php?id=<?php echo $a->_id; ?>" class="btn-delete" style="color:white; border-color:#F1C40F;">Modifier</a>
+
+                        <td style="vertical-align: top; color: #ccc;">
+                            <?php if(!empty($membres)): ?>
+                                <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.9em;">
+                                <?php foreach($membres as $membre): ?>
+                                    <li style="margin-bottom: 3px;"><?php echo is_string($membre) ? $membre : ($membre->nom ?? '?'); ?></li>
+                                <?php endforeach; ?>
+                                </ul>
+                            <?php else: ?>
+                                <span style="color:#555; font-style: italic;">Non renseigné</span>
+                            <?php endif; ?>
+                        </td>
+
+                        <td style="vertical-align: top;">
+                            <?php if(!empty($discographie)): ?>
+                                <?php foreach($discographie as $album): 
+                                    $titreAlbum = $album->titreAlbum ?? 'Album Inconnu';
+                                    $annee = $album->anneeSortie ?? '-';
+                                    $tracks = $album->tracks ?? [];
+                                ?>
+                                    <div style="background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px; margin-bottom: 8px;">
+                                        <div style="color: #F1C40F; font-weight: bold; border-bottom: 1px solid #444; padding-bottom: 4px; margin-bottom: 4px;">
+                                            <?php echo $titreAlbum; ?> <span style="color:#888; font-weight:normal;">(<?php echo $annee; ?>)</span>
+                                        </div>
+
+                                        <?php if(!empty($tracks)): ?>
+                                            <ul style="list-style: none; padding-left: 10px; margin: 0;">
+                                            <?php foreach($tracks as $track): 
+                                                $titreTrack = $track->titre ?? 'Piste Inconnue';
+                                                $duree = isset($track->dureeSecondes) ? gmdate("i:s", $track->dureeSecondes) : '--:--';
+                                                $feats = $track->featuring ?? [];
+                                            ?>
+                                                <li style="font-size: 0.9em; margin-bottom: 3px; color: #ddd;">
+                                                    <?php echo $titreTrack; ?> <span style="color:#666; font-size:0.8em;">(<?php echo $duree; ?>)</span>
+
+                                                    <?php if(!empty($feats)): ?>
+                                                        <div style="font-size: 0.85em; color: #7B61FF; margin-left: 15px;">
+                                                            Feat: 
+                                                            <?php 
+                                                            $featNames = [];
+                                                            foreach($feats as $f) {
+                                                                $featNames[] = $f->nomFeat ?? '';
+                                                            }
+                                                            echo implode(", ", $featNames);
+                                                            ?>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </li>
+                                            <?php endforeach; ?>
+                                            </ul>
+                                        <?php else: ?>
+                                            <div style="font-size: 0.8em; color: #666; padding-left: 10px;">Aucune piste listée.</div>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <span style="color:#555; font-style: italic;">Discographie vide</span>
+                            <?php endif; ?>
+                        </td>
+
+                        <td style="vertical-align: top;">
+                            <a href="artiste_edit.php?id=<?php echo $a->_id; ?>" class="btn-delete" style="color:white; border-color:#F1C40F; margin-bottom:5px; display:inline-block;">Modifier</a>
                             <a href="dashboard.php?action=delete_artiste&id=<?php echo $a->_id; ?>" class="btn-delete" onclick="return confirm('Supprimer cet artiste ?');">X</a>
                         </td>
                     </tr>
@@ -361,64 +474,98 @@ function formatDuree($debut, $fin) {
 
 <div class="admin-card">
             <div class="section-header">
-                <h2>🎫 Festivaliers & Billetterie</h2>
-                <a href="festivalier_edit.php" class="btn-add">＋ Nouveau</a>
+                <h2>🎫 Festivaliers</h2>
             </div>
             <table class="admin-table">
                 <thead>
                     <tr>
                         <th>Identité</th>
-                        <th>Ville</th>
-                        <th width="40%">Détails des Billets (Type - Statut - Hash)</th>
-                        <th>Actions</th>
+                        <th>Adresse</th>
+                        <th>Billets</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php 
+                    // Chargement des données si nécessaire
                     if (!isset($tousLesFestivaliers)) {
                         $tousLesFestivaliers = $festivalierManager->findAll(['nom_complet' => 1]);
                     }
                     
                     foreach($tousLesFestivaliers as $f): 
-                        $ville = isset($f->adresse->ville) ? $f->adresse->ville : '—';
+                        // Formatage Date de Naissance
+                        $naissance = isset($f->date_naissance) ? $f->date_naissance->toDateTime()->format('d/m/Y') : '';
+
+                        // Récupération des billets
                         $billets = isset($f->billets_achetes) ? $f->billets_achetes : [];
                     ?>
                     <tr>
-                        <td>
-                            <strong style="color: white;"><?php echo $f->nom_complet; ?></strong><br>
-                            <small style="color: #aaa;"><?php echo $f->email; ?></small>
+                        <td style="vertical-align: top;">
+                            <strong style="color: white; font-size: 1.1em;"><?php echo $f->nom_complet; ?></strong><br>
+                            <span style="color: #aaa; font-size: 0.9em;"><?php echo $f->email; ?></span>
+                            <?php if($naissance): ?>
+                                <br><span style="color: #666; font-size: 0.8em;"><?php echo $naissance; ?></span>
+                            <?php endif; ?>
                         </td>
                         
-                        <td><?php echo $ville; ?></td>
-                        
-                        <td>
+                        <td style="vertical-align: top; color: #ccc;">
+                            <?php 
+                                echo ($f->adresse->rue ?? '') . "<br>" . 
+                                     ($f->adresse->code_postal ?? '') . " " . 
+                                     ($f->adresse->ville ?? ''); 
+                            ?>
+                        </td>
+
+                        <td style="vertical-align: top;">
                             <?php if(count($billets) > 0): ?>
-                                <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85em;">
+                                <ul style="list-style: none; padding: 0; margin: 0;">
                                 <?php foreach($billets as $b): 
+                                    // Extraction sécurisée des données
                                     $type = $b->type_billet ?? 'Inconnu';
-                                    $isValide = $b->qr_code_data->validation->est_valide ?? false;
-                                    $hash = $b->qr_code_data->hash_billet ?? 'N/A';
+                                    $prix = isset($b->prix_paye) ? $b->prix_paye . '€' : '0€';
                                     
-                                    // Couleur selon validité
-                                    $color = $isValide ? '#2ed573' : '#ff4757';
-                                    $statutTxt = $isValide ? 'VALIDE' : 'INVALIDE';
+                                    // Dates
+                                    $dateAchat = isset($b->date_achat) ? $b->date_achat->toDateTime()->format('d/m/Y H:i') : '-';
+                                    
+                                    // Données QR & Validation
+                                    $qrData = $b->qr_code_data ?? null;
+                                    $hash = $qrData->hash_billet ?? 'N/A';
+                                    $urlQr = $qrData->url_image_qr ?? '#';
+                                    
+                                    $isValide = $qrData->validation->est_valide ?? false;
+                                    $dateScan = isset($qrData->validation->date_scan) ? $qrData->validation->date_scan->toDateTime()->format('d/m à H:i') : null;
+
+                                    // Couleurs
+                                    $colorStatus = $isValide ? '#2ed573' : '#ff4757';
+                                    $txtStatus = $isValide ? 'VALIDE' : 'DÉJÀ SCANNÉ';
                                 ?>
-                                    <li style="margin-bottom: 5px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 4px;">
-                                        <span style="color: #7B61FF; font-weight:bold;"><?php echo $type; ?></span>
-                                        <span style="color: <?php echo $color; ?>; font-weight:bold; margin: 0 5px;">[<?php echo $statutTxt; ?>]</span>
-                                        <br>
-                                        <span style="font-family: monospace; color: #ccc;">Hash: <?php echo $hash; ?></span>
+                                    <li style="margin-bottom: 10px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px; font-size: 0.9em;">
+                                        
+                                        <div style="font-weight: bold; color: #fff; margin-bottom: 2px;">
+                                            <?php echo $type; ?> <span style="color: #F1C40F;">(<?php echo $prix; ?>)</span>
+                                        </div>
+
+                                        <div style="color: #aaa; margin-bottom: 4px; font-size: 0.85em;">
+                                            Acheté le : <?php echo $dateAchat; ?>
+                                        </div>
+
+                                        <div style="font-family: monospace; color: #888; margin-bottom: 4px; word-break: break-all;">
+                                            #<?php echo substr($hash, 0, 12); ?>... <br>
+                                            <a href="<?php echo $urlQr; ?>" target="_blank" style="color: #7B61FF;">Voir le QR</a>
+                                        </div>
+
+                                        <div style="border-top: 1px solid #444; padding-top: 4px; margin-top: 4px;">
+                                            Statut : <span style="color: <?php echo $colorStatus; ?>; font-weight: bold;"><?php echo $txtStatus; ?></span>
+                                            <?php if(!$isValide && $dateScan): ?>
+                                                <br><span style="color: #eccc68;">Scanné le : <?php echo $dateScan; ?></span>
+                                            <?php endif; ?>
+                                        </div>
+
                                     </li>
                                 <?php endforeach; ?>
                                 </ul>
                             <?php else: ?>
                                 <span style="color:#555; font-style: italic;">Aucun billet</span>
                             <?php endif; ?>
-                        </td>
-
-                        <td>
-                            <a href="festivalier_edit.php?id=<?php echo $f->_id; ?>" class="btn-delete" style="color:white; border-color:#7B61FF;">Consult.</a>
-                            <a href="dashboard.php?action=delete_festivalier&id=<?php echo $f->_id; ?>" class="btn-delete" onclick="return confirm('Supprimer ce festivalier ?');">X</a>
                         </td>
                     </tr>
                     <?php endforeach; ?>
