@@ -10,7 +10,8 @@ class Connexion { // Singleton
     private $dbPass = 'admin123'; 
     private $dbHost = 'localhost';
     private $dbPort = '27017';
-private function __construct() {
+
+    private function __construct() {
         try {
             // Encode le mdp
             $encodedPass = urlencode($this->dbPass);

@@ -1,18 +1,15 @@
 <?php
 session_start();
 
-// 1. Chargement des classes
 require_once '../Classes/Connexion.php';
 require_once '../Classes/Manager.php';
 require_once '../Classes/StandManager.php';
 
-// Sécurité
 if (!isset($_SESSION['admin_logged_in'])) { 
     header("Location: login.php"); 
     exit; 
 }
 
-// 2. Instanciation du Manager
 $standManager = new StandManager();
 
 $id = null;
@@ -20,23 +17,21 @@ $nom_stand = "";
 $type_stand = ""; 
 $ouvert = false; 
 
-// Variables pour le sous-document "proprietaire"
 $nom_proprioStand = "";
 $num_proprioStand = ""; 
 
 $pageTitle = "Ajouter un Stand";
 
-// --- MODE MODIFICATION (Récupération des données) ---
+// Modification Stand
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
-    $doc = $standManager->findById($id); // Via l'objet
+    $doc = $standManager->findById($id); 
     
     if ($doc) {
         $nom_stand = $doc->nom_stand;
         $type_stand = $doc->type_stand;
         $ouvert = $doc->ouvert ?? false;
 
-        // Gestion du sous-document 'proprietaire'
         // On vérifie si l'objet existe avant d'accéder à ses propriétés
         if (isset($doc->proprietaire)) {
             $nom_proprioStand = $doc->proprietaire->nom_proprioStand ?? "";
@@ -47,14 +42,13 @@ if (isset($_GET['id'])) {
     }
 }
 
-// --- TRAITEMENT DU FORMULAIRE (POST) ---
+// Formulaire Ajout/Modif Stand
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
-    // On structure les données pour respecter l'imbrication (Profondeur niveau 2)
     $data = [
         'nom_stand'  => $_POST['nom_stand'],
         'type_stand' => $_POST['type_stand'],
-        'ouvert'     => isset($_POST['ouvert']), // Checkbox retourne 'on' ou rien
+        'ouvert'     => isset($_POST['ouvert']), 
         'proprietaire' => [
             'nom_proprioStand' => $_POST['nom_proprioStand'],
             'num_proprioStand' => $_POST['num_proprioStand']

@@ -8,27 +8,24 @@ require_once '../Classes/SceneManager.php';
 require_once '../Classes/ConcertManager.php';
 require_once '../Classes/BenevoleManager.php';
 require_once '../Classes/StandManager.php';
-// On a retiré FestivalierManager !
 
 if (!isset($_SESSION['admin_logged_in'])) {
     header("Location: login.php");
     exit;
 }
 
-// 1. Connexion Sécurisée (CRUCIAL)
 $connexion = Connexion::getInstance();
 $manager = $connexion->getManager();
 $dbName = $connexion->getDbName();
 
-// 2. Instanciation des Managers restants
-$artisteManager    = new ArtisteManager();
-$sceneManager      = new SceneManager();
-$concertManager    = new ConcertManager();
-$benevoleManager   = new BenevoleManager();
-$standManager      = new StandManager();
+$artisteManager = new ArtisteManager();
+$sceneManager = new SceneManager();
+$concertManager = new ConcertManager();
+$benevoleManager = new BenevoleManager();
+$standManager = new StandManager();
 
 
-// --- 3. Gestion des Actions (Suppressions) ---
+// Gestion Suppressions
 if (isset($_GET['action']) && isset($_GET['id'])) {
     $id = $_GET['id'];
     $deleted = false;
@@ -57,8 +54,6 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
     }
 }
 
-// --- 4. Récupération des Données ---
-
 // Artistes
 $artistes = $artisteManager->findAll(['est_tete_affiche' => -1, 'nom_scene_artiste' => 1]);
 $artistesMap = [];
@@ -69,11 +64,11 @@ $scenes = $sceneManager->findAll(['nom_scene' => 1]);
 $scenesMap = [];
 foreach($scenes as $s) $scenesMap[(string)$s->_id] = $s->nom_scene;
 
-// Concerts (Direct via Manager pour le tri)
+// Concerts
 $cursorProg = $manager->executeQuery("$dbName.concerts", new MongoDB\Driver\Query([], ['sort' => ['heure_debut' => 1]]));
 $programmation = $cursorProg->toArray();
 
-// Mapping Concerts -> Scènes
+// Concerts par scène (affichage)
 $concertsByScene = [];
 foreach ($programmation as $p) {
     $sid = (string)$p->scene_id;
@@ -91,23 +86,20 @@ foreach ($programmation as $p) {
 $benevoles = $benevoleManager->findAll(['nom' => 1]);
 $stands = $standManager->findAll(['nom_stand' => 1]);
 
-// FESTIVALIERS (RECUPÉRATION DIRECTE SANS MANAGER)
+// Festivaliers
 $queryFest = new MongoDB\Driver\Query([], ['sort' => ['nom_complet' => 1]]);
 $cursorFest = $manager->executeQuery("$dbName.festivaliers", $queryFest);
 $tousLesFestivaliers = $cursorFest->toArray();
 
 
-// --- 5. Statistiques ---
+// Stats
 $stats = [
-    'artistes'     => count($artistes),
     'concerts'     => count($programmation),
     'scenes'       => count($scenes),
     'benevoles'    => count($benevoles),
-    'festivaliers' => count($tousLesFestivaliers),
-    'stands'       => count($stands)
-];
+    'festivaliers' => count($tousLesFestivaliers),];
 
-// Helper Durée
+// Format Durée
 function formatDuree($debut, $fin) {
     $seconds = $fin->getTimestamp() - $debut->getTimestamp();
     $heures = floor($seconds / 3600);
@@ -123,20 +115,6 @@ function formatDuree($debut, $fin) {
     <title>Dashboard Admin - TokaFest</title>
     <link rel="stylesheet" href="../css/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px; }
-        .stat-card { background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; border-left: 4px solid #7B61FF; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .stat-number { font-size: 2.5em; font-weight: bold; color: white; margin: 0; }
-        .stat-label { color: #888; font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px; }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .btn-add { background-color: #7B61FF; color: white; padding: 10px 20px; text-decoration: none; border-radius: 30px; font-weight: bold; transition: 0.3s; font-size: 0.9em; }
-        .btn-add:hover { background-color: #9d8aff; box-shadow: 0 0 15px rgba(123, 97, 255, 0.4); }
-        .badge-headliner { background-color: #F1C40F; color: black; font-weight: bold; }
-        .list-concerts { list-style: none; padding: 0; margin: 0; font-size: 0.9em; }
-        .list-concerts li { margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid #222; }
-        .badge-purple { background-color: #7B61FF; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; }
-        .badge { padding: 2px 8px; border-radius: 4px; font-size: 0.8em; background: #333; color: white; }
-    </style>
 </head>
 <body>
 
@@ -152,16 +130,16 @@ function formatDuree($debut, $fin) {
 
         <div class="stats-grid">
             <div class="stat-card" style="border-left-color: #F1C40F;">
-                <p class="stat-number"><?php echo $stats['artistes']; ?></p>
-                <p class="stat-label">Artistes</p>
-            </div>
-            <div class="stat-card">
                 <p class="stat-number"><?php echo $stats['concerts']; ?></p>
                 <p class="stat-label">Concerts</p>
             </div>
             <div class="stat-card" style="border-left-color: #FF6FA3;">
                 <p class="stat-number"><?php echo $stats['scenes']; ?></p>
                 <p class="stat-label">Scènes</p>
+            </div>
+            <div class="stat-card">
+                <p class="stat-number"><?php echo $stats['benevoles']; ?></p>
+                <p class="stat-label">Bénévoles</p>
             </div>
             <div class="stat-card" style="border-left-color: #2ed573;">
                 <p class="stat-number"><?php echo $stats['festivaliers']; ?></p>

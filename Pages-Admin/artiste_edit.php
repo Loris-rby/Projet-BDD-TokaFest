@@ -53,8 +53,6 @@ if (isset($_GET['id'])) {
 // Formulaire Ajout/Modif Artiste
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
-    // Récupération propre du tableau HTML 'membres[]'
-    // array_filter permet d'enlever les cases vides si l'admin en a laissé une blanche
     $membresArray = [];
     if (isset($_POST['membres']) && is_array($_POST['membres'])) {
         $membresArray = array_values(array_filter($_POST['membres'])); 
@@ -91,13 +89,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title><?php echo $pageTitle; ?></title>
     <link rel="stylesheet" href="../css/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        .membre-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        .btn-remove { background: #ff4757; color: white; border: none; padding: 0 15px; cursor: pointer; border-radius: 4px; font-weight: bold; }
-        .btn-remove:hover { background: #e84118; }
-        .btn-add-member { background: #222; border: 1px dashed #7B61FF; color: #7B61FF; width: 100%; padding: 10px; cursor: pointer; margin-top: 5px; }
-        .btn-add-member:hover { background: rgba(123, 97, 255, 0.1); }
-    </style>
 </head>
 <body>
     <nav class="admin-nav">
@@ -136,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     <div id="membres-container">
                         <?php 
-                        // S'il y a déjà des membres, on crée une ligne pour chaque
+                        // 1 ligne pour chaque membre
                         if (!empty($membresList)): 
                             foreach($membresList as $membre): ?>
                             <div class="membre-row">
@@ -199,11 +190,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         function removeRow(btn) {
             const container = document.getElementById('membres-container');
-            // On empêche de tout supprimer s'il ne reste qu'une ligne (optionnel, mais mieux pour l'UX)
             if (container.children.length > 1) {
                 btn.parentElement.remove();
             } else {
-                // Si c'est la dernière ligne, on vide juste le champ
                 btn.previousElementSibling.value = '';
             }
         }

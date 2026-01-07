@@ -1,6 +1,6 @@
 <?php
 session_start();
-// IMPORTANT : Assure-toi d'inclure ta classe Connexion ici
+
 require_once '../Classes/Connexion.php'; 
 
 $message = "";
@@ -10,15 +10,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
     try {
-        // 1. On récupère l'instance unique de connexion (qui contient déjà le mot de passe sécurisé)
         $connexion = Connexion::getInstance();
         $manager = $connexion->getManager();
         $dbName = $connexion->getDbName();
 
-        // 2. Préparation de la requête
         $query = new MongoDB\Driver\Query(['username' => $username]);
         
-        // 3. Exécution (on utilise la variable $dbName pour être dynamique)
         $cursor = $manager->executeQuery("$dbName.admins", $query);
         $user = current($cursor->toArray());
 
