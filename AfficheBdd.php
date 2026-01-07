@@ -1,40 +1,61 @@
 <?php
-// On force le navigateur à comprendre que c'est du texte brut (JSON)
 header('Content-Type: application/json; charset=utf-8');
 
-// Connexion (Exactement comme ton script qui marche)
+// Configuration
+$dbName = 'tokafest_db'; // Vérifie bien que c'est le bon nom !
+
 try {
     $manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
-    $dbName = 'tokafest_db';
-} catch (Exception $e) {
-    die(json_encode(["erreur" => "Echec connexion : " . $e->getMessage()]));
-}
 
-// Liste de tes collections
-$collections = ['artistes', 'festivaliers', 'scenes', 'benevoles', 'concerts', 'stands'];
-$data = [];
-
-// On parcourt chaque collection pour tout aspirer
-foreach ($collections as $col) {
+    // 1. On demande à MongoDB la liste réelle des collections
+    // Cela permet de voir si la base existe et contient des choses
+    $command = new MongoDB\Driver\Command(["listCollections" => 1]);
+    
     try {
-        $query = new MongoDB\Driver\Query([]); 
-        $cursor = $manager->executeQuery("$dbName.$col", $query);
+        $cursorCols = $manager->executeCommand($dbName, $command);
+    } catch (MongoDB\Driver\Exception\Exception $e) {
+        // Si cette commande échoue, c'est souvent que la base n'existe pas
+        die(json_encode(["erreur_critique" => "Impossible de lister les collections. La base '$dbName' existe-t-elle ?", "details" => $e->getMessage()]));
+    }
+
+    $data = [];
+    $foundCollections = [];
+
+    // 2. On parcourt les collections trouvées
+    foreach ($cursorCols as $collectionInfo) {
+        $colName = $collectionInfo->name;
+        $foundCollections[] = $colName;
+
+        // On ignore les collections système (comme system.indexes)
+        if (strpos($colName, 'system.') === 0) continue;
+
+        // 3. On récupère le contenu
+        $query = new MongoDB\Driver\Query([]);
+        $cursor = $manager->executeQuery("$dbName.$colName", $query);
         
-        // On transforme les objets bizarres de MongoDB en tableaux simples
         $documents = [];
         foreach ($cursor as $doc) {
-            // Petite astuce pour rendre les _id ($oid) et les dates ($date) lisibles
+            // Ta méthode de conversion est correcte
             $docJson = MongoDB\BSON\toJSON(MongoDB\BSON\fromPHP($doc));
             $documents[] = json_decode($docJson);
         }
         
-        $data[$col] = $documents;
-        
-    } catch (Exception $e) {
-        $data[$col] = ["erreur" => $e->getMessage()];
+        $data[$colName] = $documents;
     }
-}
 
-// Affichage final
-echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    // Ajout d'infos de debug pour t'aider
+    $response = [
+        "debug_info" => [
+            "base_de_donnee_ciblee" => $dbName,
+            "collections_trouvees_dans_mongo" => $foundCollections,
+            "message" => empty($foundCollections) ? "Aucune collection trouvée. Erreur de nom de BDD ?" : "Collections chargées."
+        ],
+        "contenu" => $data
+    ];
+
+    echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+} catch (Exception $e) {
+    echo json_encode(["erreur_generale" => $e->getMessage()]);
+}
 ?>

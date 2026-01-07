@@ -15,16 +15,11 @@ if (!isset($_SESSION['admin_logged_in'])) {
     exit;
 }
 
-$artisteManager  = new ArtisteManager();
-$sceneManager    = new SceneManager();
-$concertManager  = new ConcertManager();
-$benevoleManager = new BenevoleManager();
-$standManager    = new StandManager();
-$festivalierManager = new FestivalierManager();
 
-$db = Connexion::getInstance()->getManager(); 
 
-// --- Suppressions---
+$manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+
+// --- Gestion des Suppressions ---
 if (isset($_GET['action']) && isset($_GET['id'])) {
     $id = $_GET['id'];
     $deleted = false;
@@ -53,7 +48,7 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
     }
 }
 
-// ---Récupération des Données (Via findAll) ---
+// --- Récupération des Données ---
 
 // Artistes (Triés par Tête d'affiche, puis nom)
 $artistes = $artisteManager->findAll(['est_tete_affiche' => -1, 'nom_scene_artiste' => 1]);
@@ -68,8 +63,9 @@ $scenes = $sceneManager->findAll(['nom_scene' => 1]);
 $scenesMap = [];
 foreach($scenes as $s) $scenesMap[(string)$s->_id] = $s->nom_scene;
 
-// Concerts
-$programmation = $concertManager->findAll(['heure_debut' => 1]);
+// Concerts (Line-up)
+$cursorProg = $manager->executeQuery('tokafest_db.concerts', new MongoDB\Driver\Query([], ['sort' => ['heure_debut' => 1]]));
+$programmation = $cursorProg->toArray();
 
 // Préparation de l'affichage des concerts par scène
 $concertsByScene = [];
@@ -98,7 +94,7 @@ $stands = $standManager->findAll(['nom_stand' => 1]);
 $tousLesFestivaliers = $festivalierManager->findAll(['nom_complet' => 1]);
 
 
-// ---Statistiques ---
+// --- Statistiques ---
 $stats = [
     'artistes'     => count($artistes),
     'concerts'     => count($programmation),
@@ -122,6 +118,9 @@ function formatDuree($debut, $fin) {
     }
 }
 ?>
+
+
+<!-- Affichage de la page -->
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -389,7 +388,7 @@ function formatDuree($debut, $fin) {
                         <td style="font-weight: bold;"><?php echo $s->nom_scene; ?></td>
                         <td style="font-size: 0.9em; color: #aaa;">
                             👥 <?php echo number_format($s->capacite_max, 0, ',', ' '); ?><br>
-                            <?php echo $s->est_couverte ? "☂︎ Couverte" : "☀ Plein air"; ?>
+                            <?php echo $s->est_couverte ? "⛺ Couverte" : "☀ Plein air"; ?>
                         </td>
                         <td>
                             <?php if(isset($concertsByScene[$sid])): ?>

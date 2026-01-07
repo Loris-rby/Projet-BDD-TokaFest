@@ -18,6 +18,8 @@ $membresList = []; // On stocke les membres sous forme de tableau ici
 $discographie = []; 
 
 $pageTitle = "Ajouter un Artiste";
+$description = "";
+$equipeTechnique = [];
 
 // --- 1. MODE MODIFICATION ---
 if (isset($_GET['id'])) {
@@ -67,7 +69,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
 
     if ($id) {
-        $artisteManager->update($id, $data);
+        $bulk->update(['_id' => $id], ['$set' => [
+            'nom_scene_artiste' => $_POST['nom_scene_artiste'],
+            'genre_musical' => $_POST['genre_musical'],
+            'est_tete_affiche' => isset($_POST['est_tete_affiche'])
+        ]]);
     } else {
         $data['discographie'] = [];
         $artisteManager->create($data);
@@ -121,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="form-group" style="margin: 20px 0;">
                     <label style="color: #F1C40F; display: flex; align-items: center; cursor: pointer; font-weight: bold;">
                         <input type="checkbox" name="est_tete_affiche" style="transform: scale(1.5); margin-right: 15px;" <?php if($est_tete_affiche) echo 'checked'; ?>>
-                        ⭐ Tête d'affiche
+                        Tête d'affiche
                     </label>
                 </div>
 
