@@ -1,64 +1,116 @@
 use tokafest_db;
-db.dropDatabase(); // Base vide au départ
+//db.auth("adminBDD", "admin123"); 
 
-//CREATION ADMIN
+// Suppression des anciennes collections
+db.admins.drop();
+db.artistes.drop();
+db.scenes.drop();
+db.concerts.drop();
+db.festivaliers.drop();
+db.benevoles.drop();
+db.stands.drop();
+
+// ========================================================
+// CRÉATION DES ADMINISTRATEURS
+// ========================================================
 db.admins.insertOne({
+    "_id": ObjectId("695e1ec9af5f40f9980d8265"),
     "username": "admin",
-    // Hash correspondant à "admin" (généré par PHP password_hash)
+    // Hash du mot de passe
     "password": "$2y$10$/6XH7OyjmoS1YdJ6m2iO.OV21lS3nmdgxVHmnrJ/zndU0iDJfBm0K"
 });
 
 
-// CREATION SCENES
-var idSceneMain = ObjectId();
-var idSceneCtrl = ObjectId();
-
+// ========================================================
+// CRÉATION DES SCÈNES
+// ========================================================
 db.scenes.insertMany([
     {
-        "_id": idSceneMain,
+        "_id": ObjectId("695e2ade1683622a2603ede4"),
         "nom_scene": "TokaMain",
         "capacite_max": 1500,
         "est_couverte": false
     },
     {
-        "_id": idSceneCtrl,
+        "_id": ObjectId("695e2ade1683622a2603ede5"),
         "nom_scene": "TokaCtrlB",
         "capacite_max": 1800,
         "est_couverte": false
+    },
+    {
+        "_id": ObjectId("695e2b9daf5f40f9980d8283"),
+        "nom_scene": "TokaPluie",
+        "capacite_max": 900,
+        "est_couverte": true
     }
 ]);
 
-// CREATION ARTISTES
-var idDaftPunk = ObjectId();
-var idGuetta = ObjectId();
-var idLuvbox = ObjectId();
 
+// ========================================================
+// CRÉATION DES STANDS
+// ========================================================
+db.stands.insertMany([
+    {
+        "_id": ObjectId("695e24a2f94003b1920041c2"),
+        "nom_stand": "AtelierChAcOu",
+        "type_stand": "MERCH",
+        "ouvert": true,
+        "proprietaire": {
+            "nom_proprioStand": "Lucie Jean",
+            "num_proprioStand": "05 76 87 65 43"
+        }
+    },
+    {
+        "_id": ObjectId("695e24e2f4bcc4687a0ec554"),
+        "nom_stand": "Burgouzz",
+        "type_stand": "RESTAURATION",
+        "ouvert": false,
+        "proprietaire": {
+            "nom_proprioStand": "Valouzz",
+            "num_proprioStand": "03 78 67 45 34"
+        }
+    },
+    {
+        "_id": ObjectId("695e251c318b5c87bd025505"),
+        "nom_stand": "Ciao kombucha",
+        "type_stand": "BOISSON",
+        "ouvert": false,
+        "proprietaire": {
+            "nom_proprioStand": "Squeezie",
+            "num_proprioStand": "05 76 87 67 40"
+        }
+    }
+]);
+
+// ========================================================
+// CRÉATION DES ARTISTES
+// ========================================================
 db.artistes.insertMany([
     {
-        "_id": idDaftPunk,
+        "_id": ObjectId("695e2afbaf5f40f9980d826f"),
         "nom_scene_artiste": "Daft Punk",
         "genre_musical": "French Touch",
         "description": "Robots légendaires.",
         "est_tete_affiche": true,
-        "membres": ["Thomas Bangalter", "Guy-Manuel de Homem-Christo"],
+        "membres": ["Yann Jaquelin", "Jean Jacques"],
         "discographie": [
             {
                 "titreAlbum": "Discovery",
                 "anneeSortie": 2001,
                 "tracks": [
                     { "titre": "One More Time", "dureeSecondes": 320, "featuring": [] },
-                    { "titre": "Harder, Better...", "dureeSecondes": 224, "featuring": [] }
+                    { "titre": "Harder, Better, Faster, Stronger", "dureeSecondes": 224, "featuring": [] }
                 ]
             }
         ]
     },
     {
-        "_id": idGuetta,
+        "_id": ObjectId("695e2afbaf5f40f9980d8270"),
         "nom_scene_artiste": "David Guetta",
         "genre_musical": "EDM",
         "description": "Le DJ français n°1.",
         "est_tete_affiche": true,
-        "membres": ["David Guetta"],
+        "membres": ["Pierre Roulet", "Jean Charles"],
         "discographie": [
             {
                 "titreAlbum": "Nothing but the Beat",
@@ -70,44 +122,151 @@ db.artistes.insertMany([
         ]
     },
     {
-        "_id": idLuvbox,
+        "_id": ObjectId("695e2afbaf5f40f9980d8271"),
+        "nom_scene_artiste": "Gims",
+        "genre_musical": "Pop Urbaine",
+        "description": "Le roi de la pop urbaine française.",
+        "est_tete_affiche": true,
+        "membres": ["Franck Fort", "Sofia Zaho", "Dadju"],
+        "discographie": [
+            {
+                "titreAlbum": "Ceinture Noire",
+                "anneeSortie": 2018,
+                "tracks": [
+                    { "titre": "La Même", "dureeSecondes": 199, "featuring": [{ "nomFeat": "Vianney" }] }
+                ]
+            }
+        ]
+    },
+    {
+        "_id": ObjectId("695e2afbaf5f40f9980d8272"),
         "nom_scene_artiste": "Luvbox",
         "genre_musical": "Schranz",
         "description": "Hard techno sans concession.",
         "est_tete_affiche": false,
         "membres": ["Arthur Kerviel"],
+        "discographie": [
+            {
+                "titreAlbum": "Schranz Fury",
+                "anneeSortie": 2023,
+                "tracks": [
+                    { "titre": "160 BPM or Die", "dureeSecondes": 300, "featuring": [] }
+                ]
+            }
+        ]
+    },
+    {
+        "_id": ObjectId("695e2afbaf5f40f9980d8273"),
+        "nom_scene_artiste": "ShAd",
+        "genre_musical": "Tech House",
+        "description": "Groovy vibes all night long.",
+        "est_tete_affiche": false,
+        "membres": ["Julie Lemoine"],
         "discographie": []
+    },
+    {
+        "_id": ObjectId("695e2afbaf5f40f9980d8274"),
+        "nom_scene_artiste": "DJ php",
+        "genre_musical": "Live Coding",
+        "description": "Il code la musique en temps réel. Syntax Error est son drop.",
+        "est_tete_affiche": false,
+        "membres": ["Bob Martin", "Alice Durant"],
+        "discographie": [
+            {
+                "titreAlbum": "While(true) { Dance(); }",
+                "anneeSortie": 2025,
+                "tracks": [
+                    { "titre": "Segmentation Fault", "dureeSecondes": 404, "featuring": [] }
+                ]
+            }
+        ]
     }
 ]);
 
-//CREATION CONCERTS
+// ========================================================
+// CRÉATION DES CONCERTS
+// ========================================================
 db.concerts.insertMany([
     {
-        "heure_debut": ISODate("2026-06-20T22:00:00Z"),
-        "heure_fin": ISODate("2026-06-20T23:30:00Z"),
-        "artiste_id": idDaftPunk, 
-        "scene_id": idSceneMain  
+        "_id": ObjectId("695e2afbaf5f40f9980d8275"),
+        "heure_debut": new Date(1767895200000),
+        "heure_fin": new Date(1767900600000),
+        "artiste_id": ObjectId("695e2afbaf5f40f9980d8271"), // Gims
+        "scene_id": ObjectId("695e2ade1683622a2603ede4")    // TokaMain
     },
     {
-        "heure_debut": ISODate("2026-06-20T20:00:00Z"),
-        "heure_fin": ISODate("2026-06-20T21:30:00Z"),
-        "artiste_id": idGuetta,  
-        "scene_id": idSceneMain   
+        "_id": ObjectId("695e2afbaf5f40f9980d8276"),
+        "heure_debut": new Date(1767902400000),
+        "heure_fin": new Date(1767907800000),
+        "artiste_id": ObjectId("695e2afbaf5f40f9980d8270"), // Guetta
+        "scene_id": ObjectId("695e2ade1683622a2603ede4")    // TokaMain
     },
     {
-        "heure_debut": ISODate("2026-06-20T23:00:00Z"),
-        "heure_fin": ISODate("2026-06-21T00:30:00Z"),
-        "artiste_id": idLuvbox,   
-        "scene_id": idSceneCtrl   
+        "_id": ObjectId("695e2afbaf5f40f9980d8277"),
+        "heure_debut": new Date(1767909600000),
+        "heure_fin": new Date(1767915000000),
+        "artiste_id": ObjectId("695e2afbaf5f40f9980d826f"), // Daft Punk
+        "scene_id": ObjectId("695e2ade1683622a2603ede4")    // TokaMain
+    },
+    {
+        "_id": ObjectId("695e2afbaf5f40f9980d8278"),
+        "heure_debut": new Date(1767898800000),
+        "heure_fin": new Date(1767902400000),
+        "artiste_id": ObjectId("695e2afbaf5f40f9980d8274"), // DJ php
+        "scene_id": ObjectId("695e2ade1683622a2603ede5")    // TokaCtrlB
+    },
+    {
+        "_id": ObjectId("695e2afbaf5f40f9980d8279"),
+        "heure_debut": new Date(1767904200000),
+        "heure_fin": new Date(1767909600000),
+        "artiste_id": ObjectId("695e2afbaf5f40f9980d8273"), // ShAd
+        "scene_id": ObjectId("695e2ade1683622a2603ede5")    // TokaCtrlB
+    },
+    {
+        "_id": ObjectId("695e2afbaf5f40f9980d827a"),
+        "heure_debut": new Date(1767911400000),
+        "heure_fin": new Date(1767916740000),
+        "artiste_id": ObjectId("695e2afbaf5f40f9980d8272"), // Luvbox
+        "scene_id": ObjectId("695e2ade1683622a2603ede5")    // TokaCtrlB
     }
 ]);
 
-//CREATION FESTIVALIERS
+// ========================================================
+// CRÉATION DES BÉNÉVOLES
+// ========================================================
+db.benevoles.insertMany([
+    {
+        "_id": ObjectId("695e2afbaf5f40f9980d8280"),
+        "nom": "Dupont",
+        "prenom": "Jean",
+        "equipe": "Bar",
+        "scene_assignee_id": ObjectId("695e2ade1683622a2603ede4")
+    },
+    {
+        "_id": ObjectId("695e2afbaf5f40f9980d8281"),
+        "nom": "Durand",
+        "prenom": "Marie",
+        "equipe": "Sécurité",
+        "scene_assignee_id": ObjectId("695e2ade1683622a2603ede5")
+    },
+    {
+        "_id": ObjectId("695e2afbaf5f40f9980d8282"),
+        "nom": "Curie",
+        "prenom": "Pierre",
+        "equipe": "Nettoyage",
+        "scene_assignee_id": null
+    }
+]);
+
+// ========================================================
+// CRÉATION DES FESTIVALIERS
+// ========================================================
 db.festivaliers.insertMany([
     {
+        "_id": ObjectId("695e2afbaf5f40f9980d827b"),
         "nom_complet": "Loris Rouby",
         "email": "loris.rouby@test.com",
-        "date_naissance": ISODate("2006-06-09T00:00:00Z"),
+        "date_naissance": new Date(1149811200000),
         "adresse": {
             "rue": "10 Rue du Code",
             "ville": "Lyon",
@@ -116,7 +275,7 @@ db.festivaliers.insertMany([
         "billets_achetes": [
             {
                 "type_billet": "Pass VIP",
-                "date_achat": new Date(),
+                "date_achat": new Date(1767779067553),
                 "prix_paye": 250,
                 "qr_code_data": {
                     "hash_billet": "e41de4a16e6bc0f8",
@@ -129,61 +288,103 @@ db.festivaliers.insertMany([
         ]
     },
     {
+        "_id": ObjectId("695e2afbaf5f40f9980d827c"),
         "nom_complet": "Charlotte Encarnacao",
         "email": "charlotte.e@test.com",
-        "date_naissance": ISODate("2006-06-13T00:00:00Z"),
-        "adresse": { "rue": "Av. Dance", "ville": "Paris", "code_postal": "75001" },
+        "date_naissance": new Date(1150156800000),
+        "adresse": {
+            "rue": "25 Avenue de la Dance",
+            "ville": "Paris",
+            "code_postal": "75001"
+        },
         "billets_achetes": [
             {
                 "type_billet": "Pass 3 Jours",
-                "date_achat": new Date(),
+                "date_achat": new Date(1767779067553),
                 "prix_paye": 120,
                 "qr_code_data": {
-                    "hash_billet": "a961cb1d1170",
+                    "hash_billet": "a961cb1d1170148a",
                     "validation": {
-                        "est_valide": false, // Déja scanné
-                        "date_scan": new Date()
+                        "est_valide": false,
+                        "date_scan": new Date(1767779067553)
                     }
                 }
             }
         ]
-    }
-]);
-
-//CREATION BENEVOLES
-db.benevoles.insertMany([
-    {
-        "nom": "Dupont",
-        "prenom": "Jean",
-        "equipe": "Bar",
-        "scene_assignee_id": idSceneMain
     },
     {
-        "nom": "Curie",
-        "prenom": "Pierre",
-        "equipe": "Nettoyage",
-        "scene_assignee_id": null 
-    }
-]);
-
-//CREATION STANDS
-db.stands.insertMany([
-    {
-        "nom_stand": "Burgouzz",
-        "type_stand": "RESTAURATION",
-        "ouvert": true,
-        "proprietaire": {
-            "nom_proprioStand": "Valouzz",
-            "num_proprioStand": "06 01 02 03 04"
-        }
+        "_id": ObjectId("695e2afbaf5f40f9980d827d"),
+        "nom_complet": "Lucas Dupont",
+        "email": "lucas.d@test.com",
+        "date_naissance": new Date(895622400000),
+        "adresse": {
+            "rue": "Impasse des Lilas",
+            "ville": "Bordeaux",
+            "code_postal": "33000"
+        },
+        "billets_achetes": [
+            {
+                "type_billet": "Pass 1 Jour",
+                "date_achat": new Date(1767779067553),
+                "prix_paye": 50,
+                "qr_code_data": {
+                    "hash_billet": "54695444130a288c",
+                    "validation": {
+                        "est_valide": true,
+                        "date_scan": null
+                    }
+                }
+            }
+        ]
     },
     {
-        "nom_stand": "AtelierChAcOu",
-        "type_stand": "MERCH",
-        "ouvert": true,
-        "proprietaire": {
-            "nom_proprioStand": "Lucie Jean",
-            "num_proprioStand": "07 08 09 10 11"
-        }
+        "_id": ObjectId("695e2afbaf5f40f9980d827e"),
+        "nom_complet": "Sophie Martin",
+        "email": "sophie.m@test.com",
+        "date_naissance": new Date(1008115200000),
+        "adresse": {
+            "rue": "Boulevard Gambetta",
+            "ville": "Nice",
+            "code_postal": "06000"
+        },
+        "billets_achetes": [
+            {
+                "type_billet": "Pass 2 Jours",
+                "date_achat": new Date(1767779067553),
+                "prix_paye": 90,
+                "qr_code_data": {
+                    "hash_billet": "d4e1ddc2bfd02ab2",
+                    "validation": {
+                        "est_valide": true,
+                        "date_scan": null
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "_id": ObjectId("695e2afbaf5f40f9980d827f"),
+        "nom_complet": "Arthur Rimbaud",
+        "email": "poete@test.com",
+        "date_naissance": new Date(-3635366400000),
+        "adresse": {
+            "rue": "Rue Ivre",
+            "ville": "Charleville",
+            "code_postal": "08000"
+        },
+        "billets_achetes": [
+            {
+                "type_billet": "Pass VIP",
+                "date_achat": new Date(1767779067553),
+                "prix_paye": 250,
+                "qr_code_data": {
+                    "hash_billet": "a88937e958d9977c",
+                    "validation": {
+                        "est_valide": false,
+                        "date_scan": new Date(1767771867000)
+                    }
+                }
+            }
+        ]
     }
 ]);
