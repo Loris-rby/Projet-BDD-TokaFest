@@ -10,9 +10,8 @@ db.festivaliers.drop();
 db.benevoles.drop();
 db.stands.drop();
 
-// ========================================================
+
 // CRÉATION DES ADMINISTRATEURS
-// ========================================================
 db.admins.insertOne({
     "_id": ObjectId("695e1ec9af5f40f9980d8265"),
     "username": "admin",
@@ -21,9 +20,7 @@ db.admins.insertOne({
 });
 
 
-// ========================================================
 // CRÉATION DES SCÈNES
-// ========================================================
 db.scenes.insertMany([
     {
         "_id": ObjectId("695e2ade1683622a2603ede4"),
@@ -46,9 +43,7 @@ db.scenes.insertMany([
 ]);
 
 
-// ========================================================
 // CRÉATION DES STANDS
-// ========================================================
 db.stands.insertMany([
     {
         "_id": ObjectId("695e24a2f94003b1920041c2"),
@@ -82,9 +77,7 @@ db.stands.insertMany([
     }
 ]);
 
-// ========================================================
 // CRÉATION DES ARTISTES
-// ========================================================
 db.artistes.insertMany([
     {
         "_id": ObjectId("695e2afbaf5f40f9980d826f"),
@@ -183,9 +176,7 @@ db.artistes.insertMany([
     }
 ]);
 
-// ========================================================
 // CRÉATION DES CONCERTS
-// ========================================================
 db.concerts.insertMany([
     {
         "_id": ObjectId("695e2afbaf5f40f9980d8275"),
@@ -231,9 +222,7 @@ db.concerts.insertMany([
     }
 ]);
 
-// ========================================================
 // CRÉATION DES BÉNÉVOLES
-// ========================================================
 db.benevoles.insertMany([
     {
         "_id": ObjectId("695e2afbaf5f40f9980d8280"),
@@ -258,9 +247,7 @@ db.benevoles.insertMany([
     }
 ]);
 
-// ========================================================
 // CRÉATION DES FESTIVALIERS
-// ========================================================
 db.festivaliers.insertMany([
     {
         "_id": ObjectId("695e2afbaf5f40f9980d827b"),

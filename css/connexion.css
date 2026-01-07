@@ -2,18 +2,7 @@ body {
     margin: 0;
     padding: 0;
     background-color: black;
-    overflow: hidden; /* Empêche les barres de défilement inutiles */
-}
-
-/* Vidéo en arrière-plan */
-.video-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: -1; /* Place la vidéo derrière tous les autres éléments */
+    overflow: hidden; 
 }
 
 /* Partie header */
@@ -26,10 +15,10 @@ header {
 
 /* Supprimer la barre orange au-dessus du formulaire */
 .standard {
-    box-shadow: none; /* Supprime l'ombre */
+    box-shadow: none; 
 }
 
-/* Nouveaux styles pour le menu (optionnels, si tu veux personnaliser le comportement des boutons) */
+/* style menu navigation */
 .navbar-brand {
     font-family: 'Playfair Display', serif;
     font-size: 24px;
@@ -37,18 +26,18 @@ header {
 }
 
 .btn-group .btn {
-    background-color: green; /* Fond vert */
+    background-color: green; 
     border: none;
     border-radius: 10px;
 }
 
 .btn-group .btn:hover {
-    background-color: darkgreen; /* Fond vert foncé au survol */
+    background-color: darkgreen; 
     color: white;
 }
 
 .dropdown-menu {
-    background-color: rgba(0, 0, 0, 0.8); /* Fond semi-transparent */
+    background-color: rgba(0, 0, 0, 0.8); 
     border-radius: 10px;
     padding: 10px;
 }
